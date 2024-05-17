@@ -464,4 +464,4 @@ obj/
 # End of https://www.toptal.com/developers/gitignore/api/git,java,linux,macos,maven,dotenv,android,eclipse,windows,netbeans,intellij+all,androidstudio,visualstudiocode
 
 ### Custom ###
-!src/resources/assets/images/logo/questlog/icons
+!src/resources/assets/**/icons
