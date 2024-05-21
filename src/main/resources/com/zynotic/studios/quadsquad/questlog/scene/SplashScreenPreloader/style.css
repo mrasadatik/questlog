@@ -1,0 +1,7 @@
+.splashRootLayout {
+    -fx-background-color: transparent;
+}
+
+.splashProgress {
+    -fx-progress-color: white;
+}

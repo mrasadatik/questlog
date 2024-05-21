@@ -16,8 +16,12 @@
         <validatorfx.version>0.5.1</validatorfx.version>
         <flowless.version>0.7.3</flowless.version>
         <atlantafx.base.version>2.0.1</atlantafx.base.version>
+        <ikonli.javafx.version>12.3.1</ikonli.javafx.version>
+        <ikonli.material2.pack.version>12.3.1</ikonli.material2.pack.version>
         <javafx.version>21.0.3</javafx.version>
         <java.version>17</java.version>
+        <libphonenumber.version>8.13.37</libphonenumber.version>
+        <jackson.databind.version>2.17.1</jackson.databind.version>
         <main.class>com.zynotic.studios.quadsquad.questlog.App</main.class>
     </properties>
     <dependencies>
@@ -32,9 +36,29 @@
             <version>${javafx.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.databind.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.googlecode.libphonenumber</groupId>
+            <artifactId>libphonenumber</artifactId>
+            <version>${libphonenumber.version}</version>
+        </dependency>
+        <dependency>
             <groupId>io.github.mkpaz</groupId>
             <artifactId>atlantafx-base</artifactId>
             <version>${atlantafx.base.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.kordamp.ikonli</groupId>
+            <artifactId>ikonli-javafx</artifactId>
+            <version>${ikonli.javafx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.kordamp.ikonli</groupId>
+            <artifactId>ikonli-material2-pack</artifactId>
+            <version>${ikonli.material2.pack.version}</version>
         </dependency>
         <dependency>
             <groupId>org.fxmisc.flowless</groupId>
