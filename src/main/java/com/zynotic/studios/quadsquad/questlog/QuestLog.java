@@ -5,6 +5,7 @@ import atlantafx.base.theme.CupertinoLight;
 import com.zynotic.studios.quadsquad.questlog.components.About;
 import com.zynotic.studios.quadsquad.questlog.scene.LandingScene;
 import com.zynotic.studios.quadsquad.questlog.scene.SignInScene;
+import com.zynotic.studios.quadsquad.questlog.scene.SignUpScene;
 import javafx.application.Application;
 import javafx.geometry.*;
 import javafx.scene.Scene;
@@ -78,6 +79,13 @@ public class QuestLog extends Application {
         SignInScene signInScene = new SignInScene();
         Scene scene = new Scene(signInScene.getRoot());
         scene.getStylesheets().add(Objects.requireNonNull(SignInScene.class.getResource("SignInScene/style.css")).toExternalForm());
+        primaryStage.setScene(scene);
+    }
+
+    public static void viewSignUpScene() {
+        SignUpScene signUpScene = new SignUpScene();
+        Scene scene = new Scene(signUpScene.getRoot());
+        scene.getStylesheets().add(Objects.requireNonNull(SignUpScene.class.getResource("SignUpScene/style.css")).toExternalForm());
         primaryStage.setScene(scene);
     }
 }

@@ -9,6 +9,7 @@ import com.zynotic.studios.quadsquad.questlog.config.AppConfig;
 import com.zynotic.studios.quadsquad.questlog.utils.Dialog;
 import javafx.geometry.*;
 import javafx.scene.control.Button;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
@@ -35,6 +36,7 @@ public class LandingScene {
         Dialog aboutDialog = new Dialog(650, 450);
         GridPane bottomBar = new GridPane();
         ModalPane aboutModalPane = About.getAboutModal(aboutDialog);
+        ScrollPane logoAndAuthPreGateScrollWrapper = new ScrollPane();
 
         ImageView startupLogo = new ImageView(new Image("/assets/images/logo/questlog/questlog--horizontal--light.png"));
         startupLogo.setFitHeight(100);
@@ -77,8 +79,13 @@ public class LandingScene {
         bottomBar.setVgap(10);
         bottomBar.setPadding(new Insets(10));
 
+        logoAndAuthPreGateScrollWrapper.setContent(logoAndAuthPreGateWrapperBox);
+        logoAndAuthPreGateScrollWrapper.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        logoAndAuthPreGateScrollWrapper.setFitToHeight(true);
+        logoAndAuthPreGateScrollWrapper.setFitToWidth(true);
+
         // Add elements to the root
-        sceneRoot.setCenter(logoAndAuthPreGateWrapperBox);
+        sceneRoot.setCenter(logoAndAuthPreGateScrollWrapper);
         sceneRoot.setBottom(bottomBar);
 
         root.getChildren().addAll(sceneRoot, aboutModalPane);

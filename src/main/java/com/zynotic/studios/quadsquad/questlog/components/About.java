@@ -176,7 +176,7 @@ public class About {
 
     public static ModalPane getAboutModal(Dialog aboutDialog) {
         VBox aboutDialogContentBox = new VBox();
-        VBox aboutDialogCloseBar = new VBox();
+        GridPane aboutDialogCloseBar = new GridPane();
         GridPane aboutGridProjectTable = new GridPane();
         GridPane aboutGridCourseTable = new GridPane();
         VBox projectGroupBox = new VBox();
@@ -184,6 +184,7 @@ public class About {
         ModalPane aboutModalPane = new ModalPane();
         ScrollPane aboutDialogScrollContainer = new ScrollPane();
         ObjectMapper objectMapper = new ObjectMapper();
+        VBox aboutDialogCloseBarWrapper = new VBox();
 
         try {
             JsonNode projectGroupMembersJsonRoot = objectMapper.readTree(PROJECT_GROUP_MEMBERS);
@@ -305,9 +306,24 @@ public class About {
         aboutDialogCloseBtn.getStyleClass().addAll(Styles.ROUNDED);
         aboutDialogCloseBtn.setOnAction(evt -> aboutModalPane.hide(true));
 
-        aboutDialogCloseBar.getChildren().addAll(aboutDialogCloseBtn);
-        aboutDialogCloseBar.setAlignment(Pos.CENTER_RIGHT);
+        Text aboutTitle = new Text("About");
+        aboutTitle.getStyleClass().addAll(Styles.TITLE_3);
+
+        ColumnConstraints aboutColumn = new ColumnConstraints();
+        aboutColumn.setPercentWidth(50);
+        ColumnConstraints closeColumn = new ColumnConstraints();
+        closeColumn.setPercentWidth(50);
+
+        aboutDialogCloseBar.getColumnConstraints().addAll(aboutColumn, closeColumn);
+        GridPane.setConstraints(aboutTitle, 0, 0, 1, 1, HPos.LEFT, VPos.CENTER);
+        GridPane.setConstraints(aboutDialogCloseBtn, 1, 0, 1, 1, HPos.RIGHT, VPos.CENTER);
+        aboutDialogCloseBar.setVgap(10);
+        aboutDialogCloseBar.setHgap(10);
+        aboutDialogCloseBar.getChildren().addAll(aboutTitle, aboutDialogCloseBtn);
         aboutDialogCloseBar.setPadding(new Insets(10, 10, 0, 10));
+
+        aboutDialogCloseBarWrapper.getChildren().addAll(aboutDialogCloseBar);
+        aboutDialogCloseBarWrapper.setFillWidth(true);
 
         Text projectTitleKey = new Text("Project title:");
         projectTitleKey.getStyleClass().addAll(Styles.TEXT_CAPTION);
@@ -423,7 +439,9 @@ public class About {
         aboutDialogContentBox.setPadding(new Insets(0, 10, 10, 10));
         aboutDialogScrollContainer.setContent(aboutDialogContentBox);
         aboutDialogScrollContainer.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        aboutDialog.getChildren().setAll(aboutDialogCloseBar, aboutDialogScrollContainer);
+        aboutDialogScrollContainer.setFitToWidth(true);
+        aboutDialogScrollContainer.setFitToHeight(true);
+        aboutDialog.getChildren().setAll(aboutDialogCloseBarWrapper, aboutDialogScrollContainer);
 
         return aboutModalPane;
     }
