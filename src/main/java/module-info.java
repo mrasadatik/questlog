@@ -17,6 +17,7 @@ module com.zynotic.studios.quadsquad.questlog {
 
     opens com.zynotic.studios.quadsquad.questlog to javafx.fxml;
     exports com.zynotic.studios.quadsquad.questlog;
+    exports com.zynotic.studios.quadsquad.questlog.components;
     exports com.zynotic.studios.quadsquad.questlog.scene;
     exports com.zynotic.studios.quadsquad.questlog.model;
     exports com.zynotic.studios.quadsquad.questlog.config;

@@ -2,6 +2,7 @@ package com.zynotic.studios.quadsquad.questlog;
 
 import atlantafx.base.theme.CupertinoLight;
 
+import com.zynotic.studios.quadsquad.questlog.components.About;
 import com.zynotic.studios.quadsquad.questlog.scene.LandingScene;
 import com.zynotic.studios.quadsquad.questlog.scene.SignInScene;
 import javafx.application.Application;
@@ -12,8 +13,6 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 import java.util.Objects;
-
-import com.zynotic.studios.quadsquad.questlog.config.AppConfig;
 
 /**
  * Main class for the QuestLog application.
@@ -44,7 +43,7 @@ public class QuestLog extends Application {
         Application.setUserAgentStylesheet(new CupertinoLight().getUserAgentStylesheet());
 
         // Get application properties
-        String APP_NAME = AppConfig.getRequiredApplicationProperty("APP_NAME");
+        String APP_NAME = About.getAppName();
 
         // Set stage properties
         primaryStage.setTitle(APP_NAME);
