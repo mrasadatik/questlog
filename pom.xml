@@ -17,10 +17,13 @@
         <flowless.version>0.7.3</flowless.version>
         <atlantafx.base.version>2.0.1</atlantafx.base.version>
         <ikonli.javafx.version>12.3.1</ikonli.javafx.version>
+        <log4j.api.version>2.23.1</log4j.api.version>
         <ikonli.material2.pack.version>12.3.1</ikonli.material2.pack.version>
         <javafx.version>21.0.3</javafx.version>
         <java.version>17</java.version>
         <libphonenumber.version>8.13.37</libphonenumber.version>
+        <batik.version>1.17</batik.version>
+        <xmlgraphics.version>2.9</xmlgraphics.version>
         <jackson.databind.version>2.17.1</jackson.databind.version>
         <main.class>com.zynotic.studios.quadsquad.questlog.App</main.class>
     </properties>
@@ -69,6 +72,39 @@
             <groupId>net.synedra</groupId>
             <artifactId>validatorfx</artifactId>
             <version>${validatorfx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.xmlgraphics</groupId>
+            <artifactId>batik-dom</artifactId>
+            <version>${batik.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>${log4j.api.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.xmlgraphics</groupId>
+            <artifactId>batik-anim</artifactId>
+            <version>${batik.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.xmlgraphics</groupId>
+            <artifactId>batik-bridge</artifactId>
+            <version>${batik.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.xmlgraphics</groupId>
+            <artifactId>xmlgraphics-commons</artifactId>
+            <version>${xmlgraphics.version}</version>
+            <scope>runtime</scope>
         </dependency>
     </dependencies>
     <build>

@@ -6,7 +6,7 @@ import atlantafx.base.theme.Styles;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zynotic.studios.quadsquad.questlog.config.AppConfig;
-import com.zynotic.studios.quadsquad.questlog.model.UserPhoneNumber;
+import com.zynotic.studios.quadsquad.questlog.utils.UserPhoneNumber;
 import com.zynotic.studios.quadsquad.questlog.utils.Dialog;
 import com.zynotic.studios.quadsquad.questlog.utils.OpenLink;
 import javafx.event.ActionEvent;

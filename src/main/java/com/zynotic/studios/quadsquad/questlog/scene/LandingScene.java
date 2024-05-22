@@ -19,6 +19,8 @@ import org.kordamp.ikonli.javafx.FontIcon;
 import org.kordamp.ikonli.material2.Material2OutlinedAL;
 import org.kordamp.ikonli.material2.Material2OutlinedMZ;
 
+import java.io.IOException;
+
 public class LandingScene {
     private final StackPane root;
 
@@ -49,6 +51,13 @@ public class LandingScene {
         Button signUpBtn = new Button("Sign Up", new FontIcon(Material2OutlinedMZ.PERSON_ADD_ALT_1));
         signUpBtn.setDefaultButton(true);
         signUpBtn.setMnemonicParsing(true);
+        signUpBtn.setOnAction(e -> {
+            try {
+                QuestLog.viewSignUpScene();
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
 
         logoBox.getChildren().addAll(startupLogo);
         logoBox.setAlignment(Pos.CENTER);
@@ -70,7 +79,7 @@ public class LandingScene {
         copyrightTextBox.setAlignment(Pos.CENTER);
 
         Button aboutDialogOpenBtn = new Button(null, new FontIcon(Material2OutlinedAL.INFO));
-        aboutDialogOpenBtn.getStyleClass().addAll(Styles.ROUNDED);
+        aboutDialogOpenBtn.getStyleClass().addAll(Styles.ROUNDED, Styles.BUTTON_ICON);
         aboutDialogOpenBtn.setOnAction(evt -> aboutModalPane.show(aboutDialog));
 
         bottomBar.add(aboutDialogOpenBtn, 0, 0);

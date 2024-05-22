@@ -1,27 +1,35 @@
 package com.zynotic.studios.quadsquad.questlog.scene;
 
 import atlantafx.base.controls.CustomTextField;
+import atlantafx.base.controls.PasswordTextField;
 import atlantafx.base.theme.Styles;
 import com.zynotic.studios.quadsquad.questlog.QuestLog;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.VPos;
+import javafx.scene.Cursor;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.text.Text;
+import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.kordamp.ikonli.material2.Material2OutlinedAL;
 import org.kordamp.ikonli.material2.Material2OutlinedMZ;
 
+import java.io.IOException;
+
 public class SignInScene {
     private final StackPane root;
 
-    public SignInScene() {
+    public SignInScene(Stage primaryStage) {
+        primaryStage.setTitle("QuestLog - Sign In");
+
         root = new StackPane();
         BorderPane sceneRoot = new BorderPane();
         ScrollPane signInFormScrollWrapper = new ScrollPane();
@@ -47,7 +55,7 @@ public class SignInScene {
         signInFormHeader.setAlignment(Pos.CENTER);
 
         ImageView signInIcon = new ImageView(new Image("/assets/images/graphics/icons/sign_in.png"));
-        signInIcon.setFitHeight(100);
+        signInIcon.setFitHeight(50);
         signInIcon.setPreserveRatio(true);
 
         Text signInHeading = new Text("Sign In");
@@ -55,20 +63,37 @@ public class SignInScene {
 
         signInFormHeader.getChildren().addAll(signInIcon, signInHeading);
 
-        CustomTextField username = new CustomTextField();
-        username.setPromptText("Username/Email/Phone number");
-        username.setLeft(new FontIcon(Material2OutlinedMZ.PERSON_ADD_ALT_1));
-        username.setPrefWidth(250);
+        Label errorMessage = new Label(" ");
 
-        CustomTextField password = new CustomTextField();
-        password.setPromptText("Password");
+        CustomTextField username = new CustomTextField();
+        username.setPromptText("Enter your username");
+        username.setLeft(new FontIcon(Material2OutlinedMZ.PERSON));
+        username.setPrefWidth(280);
+
+        PasswordTextField password = new PasswordTextField();
+        password.setPromptText("Enter your password");
         password.setLeft(new FontIcon(Material2OutlinedAL.LOCK));
-        password.setPrefWidth(250);
+        password.setPrefWidth(280);
+
+        FontIcon passwordToggleIcon= new FontIcon(Material2OutlinedMZ.VISIBILITY_OFF);
+        passwordToggleIcon.setCursor(Cursor.HAND);
+        passwordToggleIcon.setOnMouseClicked(e -> {
+            passwordToggleIcon.setIconCode(password.getRevealPassword() ? Material2OutlinedMZ.VISIBILITY_OFF : Material2OutlinedMZ.VISIBILITY);
+            password.setRevealPassword(!password.getRevealPassword());
+        });
+
+        password.setRight(passwordToggleIcon);
 
         Button createAccountBtn = new Button("Create account");
         createAccountBtn.getStyleClass().addAll(Styles.FLAT);
         createAccountBtn.setMnemonicParsing(true);
-        createAccountBtn.setOnAction(e -> QuestLog.viewSignUpScene());
+        createAccountBtn.setOnAction(e -> {
+            try {
+                QuestLog.viewSignUpScene();
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
 
         Button signInBtn = new Button("Sign In", new FontIcon(Material2OutlinedAL.LOG_IN));
         signInBtn.getStyleClass().addAll(Styles.SUCCESS);
@@ -79,8 +104,8 @@ public class SignInScene {
         signInActionBtnGroup.getChildren().addAll(createAccountBtn, signInBtn);
 
         signInForm.addRow(0, signInFormHeader);
-        signInForm.addRow(1, username);
-        signInForm.addRow(2, password);
+        signInForm.addRow(1, new VBox(5, new Label("Username"), username));
+        signInForm.addRow(2, new VBox(5, new Label("Password"), password, errorMessage));
         GridPane.setConstraints(signInActionBtnGroup, 0, 3, 1, 1, HPos.RIGHT, VPos.CENTER);
 
         signInForm.getChildren().addAll(signInActionBtnGroup);

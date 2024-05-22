@@ -13,6 +13,7 @@ import javafx.scene.image.Image;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.util.Objects;
 
 /**
@@ -76,14 +77,14 @@ public class QuestLog extends Application {
     }
 
     public static void viewSignInScene() {
-        SignInScene signInScene = new SignInScene();
+        SignInScene signInScene = new SignInScene(primaryStage);
         Scene scene = new Scene(signInScene.getRoot());
         scene.getStylesheets().add(Objects.requireNonNull(SignInScene.class.getResource("SignInScene/style.css")).toExternalForm());
         primaryStage.setScene(scene);
     }
 
-    public static void viewSignUpScene() {
-        SignUpScene signUpScene = new SignUpScene();
+    public static void viewSignUpScene() throws IOException {
+        SignUpScene signUpScene = new SignUpScene(primaryStage);
         Scene scene = new Scene(signUpScene.getRoot());
         scene.getStylesheets().add(Objects.requireNonNull(SignUpScene.class.getResource("SignUpScene/style.css")).toExternalForm());
         primaryStage.setScene(scene);
