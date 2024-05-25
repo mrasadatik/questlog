@@ -1,4 +1,4 @@
-package com.zynotic.studios.quadsquad.questlog.scene;
+package com.zynotic.studios.quadsquad.questlog.scenes;
 
 import atlantafx.base.controls.CustomTextField;
 import atlantafx.base.controls.PasswordTextField;
@@ -23,6 +23,7 @@ import org.kordamp.ikonli.material2.Material2OutlinedAL;
 import org.kordamp.ikonli.material2.Material2OutlinedMZ;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 
 public class SignInScene {
     private final StackPane root;
@@ -98,6 +99,13 @@ public class SignInScene {
         Button signInBtn = new Button("Sign In", new FontIcon(Material2OutlinedAL.LOG_IN));
         signInBtn.getStyleClass().addAll(Styles.SUCCESS);
         signInBtn.setMnemonicParsing(true);
+        signInBtn.setOnAction(e -> {
+            try {
+                QuestLog.viewDashboardScene();
+            } catch (IOException | URISyntaxException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
 
         signInActionBtnGroup.setSpacing(10);
         signInActionBtnGroup.setAlignment(Pos.CENTER_RIGHT);

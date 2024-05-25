@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.zynotic.studios.quadsquad.questlog.utils;
+package com.zynotic.studios.quadsquad.questlog.utils.misc;
 
 import javafx.scene.Group;
 import javafx.scene.paint.Color;

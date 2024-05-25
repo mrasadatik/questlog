@@ -1,12 +1,11 @@
-package com.zynotic.studios.quadsquad.questlog.scene;
+package com.zynotic.studios.quadsquad.questlog.scenes;
 
 import atlantafx.base.controls.ModalPane;
 import atlantafx.base.theme.Styles;
 import atlantafx.base.util.BBCodeParser;
 import com.zynotic.studios.quadsquad.questlog.QuestLog;
 import com.zynotic.studios.quadsquad.questlog.components.About;
-import com.zynotic.studios.quadsquad.questlog.config.AppConfig;
-import com.zynotic.studios.quadsquad.questlog.utils.Dialog;
+import com.zynotic.studios.quadsquad.questlog.components.Dialog;
 import javafx.geometry.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
@@ -48,7 +47,7 @@ public class LandingScene {
         signInBtn.setMnemonicParsing(true);
         signInBtn.setOnAction(e -> QuestLog.viewSignInScene());
 
-        Button signUpBtn = new Button("Sign Up", new FontIcon(Material2OutlinedMZ.PERSON_ADD_ALT_1));
+        Button signUpBtn = new Button("Get Started", new FontIcon(Material2OutlinedMZ.PERSON_ADD_ALT_1));
         signUpBtn.setDefaultButton(true);
         signUpBtn.setMnemonicParsing(true);
         signUpBtn.setOnAction(e -> {

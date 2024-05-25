@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.zynotic.studios.quadsquad.questlog.utils;
+package com.zynotic.studios.quadsquad.questlog.utils.misc;
 
 public enum GradientPolicy {
     // use the gradient transformation matrix as-is, even if it contains 

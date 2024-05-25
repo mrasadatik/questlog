@@ -2,7 +2,7 @@ package com.zynotic.studios.quadsquad.questlog;
 
 import javafx.application.Application;
 
-import com.zynotic.studios.quadsquad.questlog.scene.SplashScreenPreloader;
+import com.zynotic.studios.quadsquad.questlog.scenes.SplashScreenPreloader;
 
 public class App {
 

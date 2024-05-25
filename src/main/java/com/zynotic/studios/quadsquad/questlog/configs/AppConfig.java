@@ -1,17 +1,36 @@
-package com.zynotic.studios.quadsquad.questlog.config;
+/*
+ * AppConfig.java
+ * Utility class for handling configuration-related tasks.
+ * Handles loading application properties, displaying alerts, and managing exceptions.
+ * Created by Md Asaduzzaman Atik on Saturday, May 18, 2024, 10:53:14 AM.
+ * Copyright (C) 2024 Zynotic Studios, Quad Squad
+ * Licensed under the GNU General Public License, Version 3.0 (the "License").
+ * You may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.html
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.zynotic.studios.quadsquad.questlog.configs;
 
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+//
 import java.util.MissingResourceException;
 import java.util.Objects;
 import java.util.ResourceBundle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+//
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Utility class for handling configuration-related tasks.
+ * Handles loading application properties, displaying alerts, and managing exceptions.
  */
 public class AppConfig {
 
@@ -19,7 +38,7 @@ public class AppConfig {
     private static ResourceBundle properties;
     private static final Image errorIcon;
 
-    private static final Logger logger = Logger.getLogger(AppConfig.class.getName());
+    private static final Logger logger = LogManager.getLogger(AppConfig.class);
 
     static {
         try {
@@ -45,7 +64,7 @@ public class AppConfig {
         try {
             return properties.getString(key);
         } catch (MissingResourceException e) {
-            logger.log(Level.WARNING, "Missing property: " + key, e);
+            logger.warn("Missing property: {}", key, e);
             return null;
         }
     }
@@ -108,7 +127,7 @@ public class AppConfig {
      * @param e The exception to handle.
      */
     private static void handleException(String message, Exception e) {
-        logger.log(Level.SEVERE, message, e);
+        logger.error(message, e);
     }
 
     /**
@@ -120,4 +139,3 @@ public class AppConfig {
         }
     }
 }
-

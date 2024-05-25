@@ -1,4 +1,4 @@
-package com.zynotic.studios.quadsquad.questlog.scene;
+package com.zynotic.studios.quadsquad.questlog.scenes;
 
 import atlantafx.base.controls.CustomTextField;
 import atlantafx.base.controls.PasswordTextField;
@@ -33,29 +33,29 @@ import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-import static com.zynotic.studios.quadsquad.questlog.utils.UserPhoneNumber.*;
+import static com.zynotic.studios.quadsquad.questlog.entities.UserPhoneNumber.*;
 
 public class SignUpScene {
     private final StackPane root;
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ISO_DATE;
     LocalDate today = LocalDate.now(ZoneId.of("Asia/Dhaka"));
-    private record CountryCodeBadge(String text) {}
+    private record CountryCallingCodeWithFlag(String text) {}
 
-    private static class CountryCodeBadgeCell extends ListCell<CountryCodeBadge> {
+    private static class CountryCallingCodeWithFlagCell extends ListCell<CountryCallingCodeWithFlag> {
         @Override
-        protected void updateItem(CountryCodeBadge countryCodeBadge, boolean isEmpty) {
-            super.updateItem(countryCodeBadge, isEmpty);
+        protected void updateItem(CountryCallingCodeWithFlag countryCallingCodeWithFlag, boolean isEmpty) {
+            super.updateItem(countryCallingCodeWithFlag, isEmpty);
 
             if (isEmpty) {
                 setGraphic(null);
                 setText(null);
             } else {
-                ImageView countryFlag = new ImageView(new Image("/assets/images/flags/3x2/png/" + countryCodeBadge.text() + ".png"));
+                ImageView countryFlag = new ImageView(new Image("/assets/images/flags/3x2/png/" + countryCallingCodeWithFlag.text() + ".png"));
                 countryFlag.setFitHeight(2*6);
                 countryFlag.setPreserveRatio(true);
                 setGraphic(countryFlag);
                 setAlignment(Pos.CENTER_LEFT);
-                setText("(" + countryCodeBadge.text() + ") +" + getCountryCallingCode(countryCodeBadge.text()));
+                setText("(" + countryCallingCodeWithFlag.text() + ") +" + getCountryCallingCode(countryCallingCodeWithFlag.text()));
             }
         }
     }
@@ -117,17 +117,17 @@ public class SignUpScene {
 
         CustomTextField phoneNumberSubscriberNumber = new CustomTextField();
 
-        ObservableList<CountryCodeBadge> countryCodeComboBoxItems = Arrays.stream(countryCodes).map(CountryCodeBadge::new).collect(Collectors.toCollection(
+        ObservableList<CountryCallingCodeWithFlag> countryCodeComboBoxItems = Arrays.stream(countryCodes).map(CountryCallingCodeWithFlag::new).collect(Collectors.toCollection(
                 FXCollections::observableArrayList
         ));
 
-        ComboBox<CountryCodeBadge> phoneNumberCountryCodeInput = new ComboBox<>(countryCodeComboBoxItems);
+        ComboBox<CountryCallingCodeWithFlag> phoneNumberCountryCodeInput = new ComboBox<>(countryCodeComboBoxItems);
         phoneNumberCountryCodeInput.setPrefWidth(170);
         phoneNumberCountryCodeInput.getStyleClass().add(Tweaks.ALT_ICON);
-        phoneNumberCountryCodeInput.setButtonCell(new CountryCodeBadgeCell());
-        phoneNumberCountryCodeInput.setCellFactory(c -> new CountryCodeBadgeCell());
+        phoneNumberCountryCodeInput.setButtonCell(new CountryCallingCodeWithFlagCell());
+        phoneNumberCountryCodeInput.setCellFactory(c -> new CountryCallingCodeWithFlagCell());
         phoneNumberCountryCodeInput.setPlaceholder(new Label("Loading..."));
-        phoneNumberCountryCodeInput.getSelectionModel().select(new CountryCodeBadge("BD"));
+        phoneNumberCountryCodeInput.getSelectionModel().select(new CountryCallingCodeWithFlag("BD"));
         phoneNumberCountryCodeInput.setOnAction(e -> {
             phoneNumberSubscriberNumber.setPromptText(getExampleNumber(phoneNumberCountryCodeInput.getSelectionModel().getSelectedItem().text(), PhoneNumberUtil.PhoneNumberType.MOBILE));
         });

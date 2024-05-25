@@ -24,10 +24,15 @@ module com.zynotic.studios.quadsquad.questlog {
     requires batik.svg.dom;
 
     opens com.zynotic.studios.quadsquad.questlog to javafx.fxml;
+    opens com.zynotic.studios.quadsquad.questlog.entities to com.fasterxml.jackson.databind;
     exports com.zynotic.studios.quadsquad.questlog;
     exports com.zynotic.studios.quadsquad.questlog.components;
-    exports com.zynotic.studios.quadsquad.questlog.scene;
-    // exports com.zynotic.studios.quadsquad.questlog.model;
-    exports com.zynotic.studios.quadsquad.questlog.config;
+    exports com.zynotic.studios.quadsquad.questlog.scenes;
+    exports com.zynotic.studios.quadsquad.questlog.entities;
+    exports com.zynotic.studios.quadsquad.questlog.services;
+    exports com.zynotic.studios.quadsquad.questlog.enums;
+    exports com.zynotic.studios.quadsquad.questlog.interfaces;
+    exports com.zynotic.studios.quadsquad.questlog.configs;
     exports com.zynotic.studios.quadsquad.questlog.utils;
+    exports com.zynotic.studios.quadsquad.questlog.utils.misc;
 }

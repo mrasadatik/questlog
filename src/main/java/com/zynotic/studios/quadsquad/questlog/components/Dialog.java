@@ -1,4 +1,4 @@
-package com.zynotic.studios.quadsquad.questlog.utils;
+package com.zynotic.studios.quadsquad.questlog.components;
 
 import javafx.scene.layout.VBox;
 

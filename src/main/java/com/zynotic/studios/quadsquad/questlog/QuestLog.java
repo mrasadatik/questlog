@@ -3,9 +3,10 @@ package com.zynotic.studios.quadsquad.questlog;
 import atlantafx.base.theme.CupertinoLight;
 
 import com.zynotic.studios.quadsquad.questlog.components.About;
-import com.zynotic.studios.quadsquad.questlog.scene.LandingScene;
-import com.zynotic.studios.quadsquad.questlog.scene.SignInScene;
-import com.zynotic.studios.quadsquad.questlog.scene.SignUpScene;
+import com.zynotic.studios.quadsquad.questlog.scenes.DashboardScene;
+import com.zynotic.studios.quadsquad.questlog.scenes.LandingScene;
+import com.zynotic.studios.quadsquad.questlog.scenes.SignInScene;
+import com.zynotic.studios.quadsquad.questlog.scenes.SignUpScene;
 import javafx.application.Application;
 import javafx.geometry.*;
 import javafx.scene.Scene;
@@ -14,6 +15,7 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Objects;
 
 /**
@@ -30,7 +32,7 @@ public class QuestLog extends Application {
     @Override
     public void init() throws Exception {
         // Simulate some initialization time
-        Thread.sleep(2000);
+        // Thread.sleep(2000);
     }
 
     /**
@@ -52,7 +54,7 @@ public class QuestLog extends Application {
         primaryStage.getIcons().add(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/assets/images/logo/questlog/icons/dark/icon16s.png"))));
         primaryStage.setWidth(4*200);
         primaryStage.setHeight(3*200);
-        primaryStage.setMinWidth(320);
+        primaryStage.setMinWidth(4*100);
 
         // Set the stage position to be centered
         Screen screen = Screen.getPrimary();
@@ -87,6 +89,13 @@ public class QuestLog extends Application {
         SignUpScene signUpScene = new SignUpScene(primaryStage);
         Scene scene = new Scene(signUpScene.getRoot());
         scene.getStylesheets().add(Objects.requireNonNull(SignUpScene.class.getResource("SignUpScene/style.css")).toExternalForm());
+        primaryStage.setScene(scene);
+    }
+
+    public static void viewDashboardScene() throws IOException, URISyntaxException {
+        DashboardScene dashboardScene = new DashboardScene(primaryStage);
+        Scene scene = new Scene(dashboardScene.getRoot());
+        scene.getStylesheets().add(Objects.requireNonNull(DashboardScene.class.getResource("DashboardScene/style.css")).toExternalForm());
         primaryStage.setScene(scene);
     }
 }

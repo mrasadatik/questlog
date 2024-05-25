@@ -1,0 +1,5 @@
+.tree-view .tree-cell:selected {
+    -fx-background-color: #007AFF26;
+    -fx-text-fill: #007AFFFF;
+    -fx-font-weight: bold;
+}

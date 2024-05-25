@@ -1,4 +1,4 @@
-package com.zynotic.studios.quadsquad.questlog.scene;
+package com.zynotic.studios.quadsquad.questlog.scenes;
 
 import atlantafx.base.theme.CupertinoLight;
 
@@ -18,7 +18,7 @@ import javafx.stage.StageStyle;
 
 import java.util.Objects;
 
-import static com.zynotic.studios.quadsquad.questlog.config.AppConfig.getRequiredApplicationProperty;
+import static com.zynotic.studios.quadsquad.questlog.configs.AppConfig.getRequiredApplicationProperty;
 
 /**
  * Preloader for the application splash screen.
