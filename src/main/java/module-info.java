@@ -28,9 +28,10 @@ module com.zynotic.studios.quadsquad.questlog {
     requires org.hibernate.validator;
     requires jakarta.validation;
     requires com.sun.jna;
+    requires org.glassfish.expressly;
 
     opens com.zynotic.studios.quadsquad.questlog to javafx.fxml;
-    opens com.zynotic.studios.quadsquad.questlog.entities to com.fasterxml.jackson.databind;
+    opens com.zynotic.studios.quadsquad.questlog.entities to com.fasterxml.jackson.databind, org.hibernate.validator;
     exports com.zynotic.studios.quadsquad.questlog;
     exports com.zynotic.studios.quadsquad.questlog.components;
     exports com.zynotic.studios.quadsquad.questlog.scenes;
@@ -40,6 +41,7 @@ module com.zynotic.studios.quadsquad.questlog {
     exports com.zynotic.studios.quadsquad.questlog.interfaces;
     exports com.zynotic.studios.quadsquad.questlog.validation;
     exports com.zynotic.studios.quadsquad.questlog.validation.validators;
+    exports com.zynotic.studios.quadsquad.questlog.annotations;
     exports com.zynotic.studios.quadsquad.questlog.configs;
     exports com.zynotic.studios.quadsquad.questlog.utils;
     exports com.zynotic.studios.quadsquad.questlog.utils.misc;

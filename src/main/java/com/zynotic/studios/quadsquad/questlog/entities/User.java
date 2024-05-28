@@ -9,15 +9,14 @@ import com.zynotic.studios.quadsquad.questlog.interfaces.DataIdentifier;
 import jakarta.validation.constraints.*;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
-import org.hibernate.validator.constraints.UniqueElements;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Objects;
-import java.util.TimeZone;
 
 import static com.zynotic.studios.quadsquad.questlog.configs.AppConfig.getRequiredApplicationProperty;
 
@@ -36,7 +35,6 @@ public class User implements Serializable, DataIdentifier {
     @NotNull(message = "User ID cannot be null")
     @PositiveOrZero(message = "User ID must greater that or equal to 0")
     @Min(value = 0, message = "User ID must greater that or equal to 0")
-    @UniqueElements(message = "User ID must be unique")
     @JsonProperty("userId") // Maps 'userId' field to JSON key
     private int userId; // Unique ID of the user
 
@@ -54,7 +52,6 @@ public class User implements Serializable, DataIdentifier {
     private LocalDate dateOfBirth; // Date of birth of the user
 
     @NotNull(message = "Gender cannot be null")
-    @NotBlank(message = "Gender cannot be blank")
     @AllowedValues(enumClass = Gender.class)
     @JsonProperty("gender") // Maps 'gender' field to JSON key
     private Gender gender; // Gender of the user
@@ -63,7 +60,6 @@ public class User implements Serializable, DataIdentifier {
     @NotBlank(message = "Username cannot be blank")
     @Length(min = 4, max = 30, message = "Username should be at least 4 characters long and less than 30")
     @Pattern(regexp = "^[a-z0-9]+$", message = "Username can only contain letters (a-z) and digits (0-9)")
-    @UniqueElements(message = "Username must be unique")
     @JsonProperty("username") // Maps 'username' field to JSON key
     private String username; // Username of the user
 
@@ -76,12 +72,10 @@ public class User implements Serializable, DataIdentifier {
     @NotBlank(message = "Email cannot be blank")
     @Length(min = 5, max = 100, message = "Email should be at least 5 characters long and less than 100")
     @Email(message = "Invalid email address")
-    @UniqueElements(message = "Email address must be unique")
     @JsonProperty("email") // Maps 'email' field to JSON key
     private String email; // Email of the user
 
     @NotNull(message = "Phone number cannot be null")
-    @UniqueElements(message = "Phone number must be unique")
     @JsonProperty("phoneNumber") // Maps 'phoneNumber' field to JSON key
     private UserPhoneNumber phoneNumber; // Phone number of the user
 
@@ -130,7 +124,6 @@ public class User implements Serializable, DataIdentifier {
             LocalDate dateOfBirth,
 
             @NotNull(message = "Gender cannot be null")
-            @NotBlank(message = "Gender cannot be blank")
             @AllowedValues(enumClass = Gender.class)
             Gender gender,
 
@@ -138,7 +131,6 @@ public class User implements Serializable, DataIdentifier {
             @NotBlank(message = "Username cannot be blank")
             @Length(min = 4, max = 30, message = "Username should be at least 4 characters long and less than 30")
             @Pattern(regexp = "^[a-z0-9]+$", message = "Username can only contain letters (a-z) and digits (0-9)")
-            @UniqueElements(message = "Username must be unique")
             String username,
 
             @NotNull(message = "Password cannot be null")
@@ -151,11 +143,9 @@ public class User implements Serializable, DataIdentifier {
             @NotBlank(message = "Email cannot be blank")
             @Length(min = 5, max = 100, message = "Email should be at least 5 characters long and less than 100")
             @Email(message = "Invalid email address")
-            @UniqueElements(message = "Email address must be unique")
             String email,
 
             @NotNull(message = "Phone number cannot be null")
-            @UniqueElements(message = "Phone number must be unique")
             UserPhoneNumber phoneNumber
     ) {
         this.name = name;
@@ -165,8 +155,8 @@ public class User implements Serializable, DataIdentifier {
         this.password = password;
         this.email = email;
         this.phoneNumber = phoneNumber;
-        this.timezone = ZoneId.systemDefault().getId();
-        this.addedAt = ZonedDateTime.now(ZoneId.of(TimeZone.getTimeZone(APP_DEFAULT_TIMEZONE).getID()));
+        this.timezone = APP_DEFAULT_TIMEZONE;
+        this.addedAt = ZonedDateTime.now(ZoneId.of(APP_DEFAULT_TIMEZONE));
         this.status = 1;
     }
 
@@ -190,14 +180,19 @@ public class User implements Serializable, DataIdentifier {
      */
     @Override
     @JsonIgnore
-    public void setId(
-            @NotNull(message = "User ID cannot be null")
-            @PositiveOrZero(message = "User ID must greater that or equal to 0")
-            @Min(value = 0, message = "User ID must greater that or equal to 0")
-            @UniqueElements(message = "User ID must be unique")
-            int userId
-    ) {
+    public void setId(int userId) {
         this.userId = userId;
+    }
+
+    /**
+     * Sets or Gets unique keys associated with the user.
+     *
+     * @return The list of unique keys.
+     */
+    @Override
+    @JsonIgnore
+    public List<String> uniqueKeys() {
+        return List.of("userId", "username", "email", "phoneNumber"); // Specify unique keys
     }
 
     /**
@@ -219,7 +214,6 @@ public class User implements Serializable, DataIdentifier {
             @NotNull(message = "User ID cannot be null")
             @PositiveOrZero(message = "User ID must greater that or equal to 0")
             @Min(value = 0, message = "User ID must greater that or equal to 0")
-            @UniqueElements(message = "User ID must be unique")
             int userId
     ) {
         this.userId = userId;
@@ -288,7 +282,6 @@ public class User implements Serializable, DataIdentifier {
      */
     public void setGender(
             @NotNull(message = "Gender cannot be null")
-            @NotBlank(message = "Gender cannot be blank")
             @AllowedValues(enumClass = Gender.class)
             Gender gender
     ) {
@@ -314,7 +307,6 @@ public class User implements Serializable, DataIdentifier {
             @NotBlank(message = "Username cannot be blank")
             @Length(min = 4, max = 30, message = "Username should be at least 4 characters long and less than 30")
             @Pattern(regexp = "^[a-z0-9]+$", message = "Username can only contain letters (a-z) and digits (0-9)")
-            @UniqueElements(message = "Username must be unique")
             String username
     ) {
         this.username = username;
@@ -363,7 +355,6 @@ public class User implements Serializable, DataIdentifier {
             @NotBlank(message = "Email cannot be blank")
             @Length(min = 5, max = 100, message = "Email should be at least 5 characters long and less than 100")
             @Email(message = "Invalid email address")
-            @UniqueElements(message = "Email address must be unique")
             String email
     ) {
         this.email = email;
@@ -385,7 +376,6 @@ public class User implements Serializable, DataIdentifier {
      */
     public void setPhoneNumber(
             @NotNull(message = "Phone number cannot be null")
-            @UniqueElements(message = "Phone number must be unique")
             UserPhoneNumber phoneNumber
     ) {
         this.phoneNumber = phoneNumber;
@@ -420,7 +410,7 @@ public class User implements Serializable, DataIdentifier {
      * @return The date when the user was added to the system.
      */
     public ZonedDateTime getAddedAt() {
-        return addedAt.withZoneSameInstant(ZoneId.of(TimeZone.getTimeZone(timezone).getID()));
+        return addedAt.withZoneSameInstant(ZoneId.of(timezone));
     }
 
     /**
@@ -433,7 +423,7 @@ public class User implements Serializable, DataIdentifier {
             @PastOrPresent(message = "User creation date should be in the past")
             ZonedDateTime addedAt
     ) {
-        this.addedAt = addedAt.withZoneSameInstant(ZoneId.of(TimeZone.getTimeZone(APP_DEFAULT_TIMEZONE).getID()));
+        this.addedAt = addedAt.withZoneSameInstant(ZoneId.of(APP_DEFAULT_TIMEZONE));
     }
 
     /**

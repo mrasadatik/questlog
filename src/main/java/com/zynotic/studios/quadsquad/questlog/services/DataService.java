@@ -17,38 +17,49 @@ package com.zynotic.studios.quadsquad.questlog.services;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-//
-import java.io.*;
-//
-import java.lang.reflect.Field;
-//
-import java.util.List;
-import java.util.Optional;
-//
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.zynotic.studios.quadsquad.questlog.interfaces.DataIdentifier;
 import com.zynotic.studios.quadsquad.questlog.utils.DataContainer;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
+import org.hibernate.validator.HibernateValidator;
+
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.util.*;
 
 /**
  * Service class for managing data operations.
  * Supports reading, writing, detecting duplicate key-value pair, adding, updating, and deleting data.
+ *
  * @param <P> The type of data entity implementing the DataIdentifier interface.
  */
 public class DataService<P extends DataIdentifier> {
     private final String DATA_FILE_PATH; // File path for storing data
     private final ObjectMapper objectMapper; // Object mapper for JSON serialization/deserialization
     private final Class<P> typeParameterClass; // Class type parameter
+    private final List<String> uniqueKeys; // List of unique keys
+    ValidatorFactory validatorFactory;
+    Validator validator;
 
     /**
-     * Constructs a DataService instance with the specified data file location and entity class.
-     * @param dataFileLocation The file path for storing data.
+     * Constructs a DataService instance with the specified data file location, entity class, and unique keys.
+     *
+     * @param dataFileLocation   The file path for storing data.
      * @param typeParameterClass The class type parameter for the entity.
      */
     public DataService(String dataFileLocation, Class<P> typeParameterClass) {
-        this.objectMapper = new ObjectMapper();
-        this.objectMapper.registerModule(new JavaTimeModule());
         this.DATA_FILE_PATH = dataFileLocation;
         this.typeParameterClass = typeParameterClass;
+        this.objectMapper = new ObjectMapper();
+        this.objectMapper.registerModule(new JavaTimeModule());
+        this.uniqueKeys = getUniqueKeys();
+        this.validatorFactory = Validation.byProvider(HibernateValidator.class).configure().buildValidatorFactory();
+        this.validator = validatorFactory.getValidator();
     }
 
     /**
@@ -62,20 +73,19 @@ public class DataService<P extends DataIdentifier> {
 
     /**
      * Reads data from the file.
+     *
      * @return The list of data read from the file.
      */
     public List<P> readData() {
         try {
             File file = new File(DATA_FILE_PATH);
             if (!file.exists()) {
-                // If file does not exist, return an empty list
                 return new DataContainer<P>().getData();
             }
             JavaType type = objectMapper.getTypeFactory().constructParametricType(DataContainer.class, typeParameterClass);
             DataContainer<P> container = objectMapper.readValue(file, type);
             return container.getData();
         } catch (IOException e) {
-            // Error handling for file reading
             e.printStackTrace();
             return new DataContainer<P>().getData();
         }
@@ -83,9 +93,10 @@ public class DataService<P extends DataIdentifier> {
 
     /**
      * Writes data to the file.
+     *
      * @param data The data to write.
      */
-    public void writeData(List<P> data) {
+    protected void writeData(List<P> data) {
         DataContainer<P> container = new DataContainer<>();
         container.setData(data);
 
@@ -94,7 +105,6 @@ public class DataService<P extends DataIdentifier> {
             JavaType type = objectMapper.getTypeFactory().constructParametricType(DataContainer.class, typeParameterClass);
             objectMapper.writerFor(type).writeValue(file, container);
         } catch (IOException e) {
-            // Error handling for file writing
             e.printStackTrace();
         }
     }
@@ -107,54 +117,101 @@ public class DataService<P extends DataIdentifier> {
      * @return True if the key-value pair matches existing data, false otherwise.
      */
     public boolean isDuplicate(String key, Object value) {
-        List<P> allData = readData();
-        for (P data : allData) {
-            try {
-                Field field = typeParameterClass.getDeclaredField(key);
-                field.setAccessible(true);
-                Object fieldValue = field.get(data);
-                if (fieldValue != null && fieldValue.equals(value)) {
-                    return true;
-                }
-            } catch (NoSuchFieldException | IllegalAccessException e) {
-                e.printStackTrace();
-            }
+        try {
+            Field field = typeParameterClass.getDeclaredField(key);
+            field.setAccessible(true);
+            String valueAsString = value != null ? value.toString() : null;
+            return readData().stream()
+                    .map(data -> {
+                        try {
+                            Object fieldValue = field.get(data);
+                            return fieldValue != null ? fieldValue.toString() : null;
+                        } catch (IllegalAccessException e) {
+                            e.printStackTrace();
+                            return null;
+                        }
+                    })
+                    .anyMatch(fieldValue -> Objects.equals(fieldValue, valueAsString));
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+            return false;
         }
-        return false;
     }
 
     /**
      * Adds new data.
+     *
      * @param data The data to add.
      * @throws IOException If an I/O error occurs.
      */
     public void addData(P data) throws IOException {
-        data.setId(getNextDataId());
-        List<P> allData = readData();
-        allData.add(data);
-        writeData(allData);
+        Set<ConstraintViolation<P>> violations = validator.validate(data);
+        if (!violations.isEmpty()) {
+            for (ConstraintViolation<P> violation : violations) {
+                System.out.println("Validation error: " + violation.getMessage());
+            }
+        } else {
+            for (String key : uniqueKeys) {
+                if (isDuplicate(key, getFieldValue(data, key))) {
+                    return;
+                }
+            }
+
+            data.setId(getNextDataId());
+            List<P> allData = readData();
+            allData.add(data);
+            writeData(allData);
+        }
+    }
+
+    /**
+     * Retrieves the field value of a given data entry by field name.
+     *
+     * @param data The data entry.
+     * @param key  The field name.
+     * @return The field value.
+     */
+    private Object getFieldValue(P data, String key) {
+        try {
+            Field field = typeParameterClass.getDeclaredField(key);
+            field.setAccessible(true);
+            return field.get(data);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     /**
      * Updates existing data.
+     *
      * @param updatedData The updated data.
      */
     public void updateData(P updatedData) {
-        List<P> data = readData();
-        for (int i = 0; i < data.size(); i++) {
-            if (data.get(i).getId() == updatedData.getId()) {
-                data.set(i, updatedData);
-                break;
+        Set<ConstraintViolation<P>> violations = validator.validate(updatedData);
+        if (!violations.isEmpty()) {
+            for (ConstraintViolation<P> violation : violations) {
+                System.out.println("Validation error: " + violation.getMessage());
             }
+        } else {
+            for (String key : uniqueKeys) {
+                if (isDuplicate(key, getFieldValue(updatedData, key))) {
+                    return;
+                }
+            }
+
+            List<P> data = readData();
+            data.replaceAll(d -> d.getId() == updatedData.getId() ? updatedData : d);
+            writeData(data);
         }
-        writeData(data);
     }
 
     /**
      * Deletes data by ID.
+     *
      * @param dataId The ID of the data to delete.
      */
-    public void deleteProject(int dataId) {
+    public void deleteData(int dataId) {
         List<P> allData = readData();
         allData.removeIf(data -> data.getId() == dataId);
         writeData(allData);
@@ -162,11 +219,30 @@ public class DataService<P extends DataIdentifier> {
 
     /**
      * Retrieves data by ID.
+     *
      * @param dataId The ID of the data to retrieve.
      * @return An optional containing the data, if found.
      */
     public Optional<P> getDataById(int dataId) {
-        List<P> allData = readData();
-        return allData.stream().filter(data -> data.getId() == dataId).findFirst();
+        return readData().stream().filter(data -> data.getId() == dataId).findFirst();
+    }
+
+    /**
+     * Retrieves the unique keys associated with the entity class.
+     *
+     * @return The list of unique keys.
+     */
+    private List<String> getUniqueKeys() {
+        if (typeParameterClass == null) {
+            return List.of();
+        }
+        try {
+            Constructor<P> constructor = typeParameterClass.getDeclaredConstructor();
+            P instance = constructor.newInstance();
+            return instance.uniqueKeys();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return List.of();
+        }
     }
 }

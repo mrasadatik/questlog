@@ -25,6 +25,7 @@ import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
+import org.hibernate.validator.HibernateValidator;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.kordamp.ikonli.material2.Material2OutlinedAL;
 import org.kordamp.ikonli.material2.Material2OutlinedMZ;
@@ -40,6 +41,7 @@ import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
+import static com.zynotic.studios.quadsquad.questlog.configs.AppConfig.getRequiredApplicationProperty;
 import static com.zynotic.studios.quadsquad.questlog.entities.UserPhoneNumber.*;
 import static com.zynotic.studios.quadsquad.questlog.validation.InputValidation.*;
 
@@ -47,7 +49,8 @@ public class SignUpScene {
     DataService<User> usersService = new DataService<User>("database/users.json", User.class);
     private final StackPane root;
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ISO_DATE;
-    LocalDate today = LocalDate.now(ZoneId.systemDefault());
+    private static final String APP_DEFAULT_TIMEZONE = getRequiredApplicationProperty("APP_DEFAULT_TIMEZONE");
+    LocalDate today = LocalDate.now(ZoneId.of(APP_DEFAULT_TIMEZONE));
     private Validator validator = new Validator();
     private final AtomicBoolean touchedName = new AtomicBoolean(false);
     private final AtomicBoolean touchedUsername = new AtomicBoolean(false);
@@ -107,6 +110,7 @@ public class SignUpScene {
     }
 
     public SignUpScene(Stage primaryStage) throws IOException {
+
         primaryStage.setTitle("QuestLog - Sign Up");
 
         root = new StackPane();
@@ -370,73 +374,68 @@ public class SignUpScene {
         signUpFormScrollWrapper.setFitToWidth(true);
 
         signUpBtn.setOnAction(e -> {
+            boolean hasError = false;
+
             String name = nameField.getText();
-            boolean nameError = false;
             LocalDate dateOfBirth = null;
-            boolean dateOfBirthError = false;
             Gender gender = null;
-            boolean genderError = false;
             String username = usernameField.getText();
-            boolean usernameError = false;
             String password = passwordField.getPassword();
-            boolean passwordError = false;
             String email = emailField.getText();
-            boolean emailError = false;
             String phoneNumberCountryCode = null;
             String phoneNumberSubscriberNumber = null;
-            boolean phoneNumberError = false;
 
             if (name.isBlank()) {
                 touchedName.set(true);
-                nameError = true;
+                hasError = true;
             }
 
             if (dateOfBirthField.getValue() == null) {
                 touchedDateOfBirth.set(true);
-                dateOfBirthError = true;
+                hasError = true;
             } else {
                 dateOfBirth = dateOfBirthField.getValue();
             }
 
             if (genderField.getSelectionModel().getSelectedItem() == null) {
                 touchedGender.set(true);
-                genderError = true;
+                hasError = true;
             } else {
                 gender = Gender.valueOf(genderField.getSelectionModel().getSelectedItem().text());
             }
 
             if (username.isBlank()) {
                 touchedUsername.set(true);
-                usernameError = true;
+                hasError = true;
             }
 
             if (password.isBlank()) {
                 touchedPassword.set(true);
                 touchedConfirmedPassword.set(true);
-                passwordError = true;
+                hasError = true;
             }
 
             if (email.isBlank()) {
                 touchedEmail.set(true);
-                emailError = true;
+                hasError = true;
             }
 
             if (phoneNumberCountryCodeInputField.getSelectionModel().getSelectedItem() == null || phoneNumberSubscriberNumberField.getText().isBlank()) {
                 touchedPhoneNumber.set(true);
-                phoneNumberError = true;
+                hasError = true;
             } else {
                 phoneNumberCountryCode = phoneNumberCountryCodeInputField.getSelectionModel().getSelectedItem().text();
                 phoneNumberSubscriberNumber = phoneNumberSubscriberNumberField.getText();
             }
 
-            if (!nameError && !dateOfBirthError && !genderError && !usernameError && !passwordError && !emailError && !phoneNumberError) {
+            validator.validate();
+
+            if (!hasError && !validator.containsErrors()) {
                 try {
                     signUp(name, dateOfBirth, gender, username, password, email, phoneNumberCountryCode, phoneNumberSubscriberNumber);
                 } catch (IOException ex) {
                     throw new RuntimeException(ex);
                 }
-            } else {
-                validator.validate();
             }
         });
 

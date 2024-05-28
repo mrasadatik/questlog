@@ -21,14 +21,13 @@ import com.zynotic.studios.quadsquad.questlog.interfaces.DataIdentifier;
 import jakarta.validation.constraints.*;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
-import org.hibernate.validator.constraints.UniqueElements;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Objects;
-import java.util.TimeZone;
 
 import static com.zynotic.studios.quadsquad.questlog.configs.AppConfig.getRequiredApplicationProperty;
 
@@ -47,7 +46,6 @@ public class Task implements Serializable, DataIdentifier {
     @NotNull(message = "Task ID cannot be null")
     @PositiveOrZero(message = "Task ID must greater that or equal to 0")
     @Min(value = 0, message = "Task ID must greater that or equal to 0")
-    @UniqueElements(message = "Task ID must be unique")
     @JsonProperty("taskId") // Maps 'taskId' field to JSON key
     private int taskId; // Unique ID of the task
 
@@ -125,8 +123,8 @@ public class Task implements Serializable, DataIdentifier {
         this.boundToProject = project.getProjectId();
         this.title = title;
         this.description = description;
-        this.addDate = ZonedDateTime.now(ZoneId.of(String.valueOf(TimeZone.getTimeZone(APP_DEFAULT_TIMEZONE).toZoneId()))); // Set creation date and time to current date and time
-        this.dueDate = dueDate.withZoneSameInstant(ZoneId.of(String.valueOf(TimeZone.getTimeZone(APP_DEFAULT_TIMEZONE).toZoneId())));
+        this.addDate = ZonedDateTime.now(ZoneId.of(APP_DEFAULT_TIMEZONE)); // Set creation date and time to current date and time
+        this.dueDate = dueDate.withZoneSameInstant(ZoneId.of(APP_DEFAULT_TIMEZONE));
         this.completed = false;
         this.boundToUser = user.getUsername();
         this.status = 1;
@@ -152,14 +150,19 @@ public class Task implements Serializable, DataIdentifier {
      */
     @Override
     @JsonIgnore
-    public void setId(
-            @NotNull(message = "Task ID cannot be null")
-            @PositiveOrZero(message = "Task ID must greater that or equal to 0")
-            @Min(value = 0, message = "Task ID must greater that or equal to 0")
-            @UniqueElements(message = "Task ID must be unique")
-            int taskId
-    ) {
+    public void setId(int taskId) {
         this.taskId = taskId;
+    }
+
+    /**
+     * Sets or Gets unique keys associated with the task.
+     *
+     * @return The list of unique keys.
+     */
+    @Override
+    @JsonIgnore
+    public List<String> uniqueKeys() {
+        return List.of("taskId"); // Specify unique keys
     }
 
     /**
@@ -181,7 +184,6 @@ public class Task implements Serializable, DataIdentifier {
             @NotNull(message = "Task ID cannot be null")
             @PositiveOrZero(message = "Task ID must greater that or equal to 0")
             @Min(value = 0, message = "Task ID must greater that or equal to 0")
-            @UniqueElements(message = "Task ID must be unique")
             int taskId
     ) {
         this.taskId = taskId;
@@ -258,7 +260,7 @@ public class Task implements Serializable, DataIdentifier {
             @NotNull(message = "User cannot be null")
             User user
     ) {
-        return dueDate.withZoneSameInstant(ZoneId.of(String.valueOf(TimeZone.getTimeZone(user.getTimezone()).toZoneId())));
+        return dueDate.withZoneSameInstant(ZoneId.of(user.getTimezone()));
     }
 
     /**
@@ -271,7 +273,7 @@ public class Task implements Serializable, DataIdentifier {
             @FutureOrPresent(message = "Task due date should be in future")
             ZonedDateTime dueDate
     ) {
-        this.dueDate = dueDate.withZoneSameInstant(ZoneId.of(String.valueOf(TimeZone.getTimeZone(APP_DEFAULT_TIMEZONE).toZoneId())));
+        this.dueDate = dueDate.withZoneSameInstant(ZoneId.of(APP_DEFAULT_TIMEZONE));
     }
 
     /**
@@ -284,7 +286,7 @@ public class Task implements Serializable, DataIdentifier {
             @NotNull(message = "User cannot be null")
             User user
     ) {
-        return addDate.withZoneSameInstant(ZoneId.of(String.valueOf(TimeZone.getTimeZone(user.getTimezone()).toZoneId())));
+        return addDate.withZoneSameInstant(ZoneId.of(user.getTimezone()));
     }
 
     /**
@@ -298,7 +300,7 @@ public class Task implements Serializable, DataIdentifier {
             @PastOrPresent(message = "Task creation date should be in past")
             ZonedDateTime addDate
     ) {
-        this.addDate = addDate.withZoneSameInstant(ZoneId.of(String.valueOf(TimeZone.getTimeZone(APP_DEFAULT_TIMEZONE).toZoneId())));
+        this.addDate = addDate.withZoneSameInstant(ZoneId.of(APP_DEFAULT_TIMEZONE));
     }
 
     /**

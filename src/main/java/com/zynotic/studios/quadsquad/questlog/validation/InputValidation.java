@@ -36,7 +36,7 @@ public class InputValidation {
     // Constants for date formatting
     private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ISO_DATE;
     private static final String APP_DEFAULT_TIMEZONE = getRequiredApplicationProperty("APP_DEFAULT_TIMEZONE");
-    private static final LocalDate today = LocalDate.now(ZoneId.of(String.valueOf(TimeZone.getTimeZone(APP_DEFAULT_TIMEZONE).toZoneId())));
+    private static final LocalDate today = LocalDate.now(ZoneId.of(APP_DEFAULT_TIMEZONE));
     private static final String APP_AGE = getRequiredApplicationProperty("APP_AGE");
 
     // Regular expressions and patterns for validation

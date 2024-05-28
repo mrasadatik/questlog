@@ -6,8 +6,13 @@ import jakarta.validation.ConstraintValidatorContext;
 
 import java.time.LocalDate;
 import java.time.Period;
+import java.time.ZoneId;
+
+import static com.zynotic.studios.quadsquad.questlog.configs.AppConfig.getRequiredApplicationProperty;
 
 public class YearsElapsedValidator implements ConstraintValidator<YearsElapsed, LocalDate> {
+
+    private static final String APP_DEFAULT_TIMEZONE = getRequiredApplicationProperty("APP_DEFAULT_TIMEZONE");
 
     private int minYears;
     private int maxYears;
@@ -24,7 +29,7 @@ public class YearsElapsedValidator implements ConstraintValidator<YearsElapsed, 
             return true; // Null values are considered valid
         }
 
-        LocalDate now = LocalDate.now();
+        LocalDate now = LocalDate.now(ZoneId.of(APP_DEFAULT_TIMEZONE));
         int yearsElapsed = Period.between(value, now).getYears();
 
         return yearsElapsed >= minYears && yearsElapsed <= maxYears;

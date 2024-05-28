@@ -23,14 +23,13 @@ import com.zynotic.studios.quadsquad.questlog.interfaces.DataIdentifier;
 import jakarta.validation.constraints.*;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.Range;
-import org.hibernate.validator.constraints.UniqueElements;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Objects;
-import java.util.TimeZone;
 
 import static com.zynotic.studios.quadsquad.questlog.configs.AppConfig.getRequiredApplicationProperty;
 
@@ -49,7 +48,6 @@ public class Project implements Serializable, DataIdentifier {
     @NotNull(message = "Project ID cannot be null")
     @PositiveOrZero(message = "Project ID must greater that or equal to 0")
     @Min(value = 0, message = "Project ID must greater that or equal to 0")
-    @UniqueElements(message = "Project ID must be unique")
     @JsonProperty("projectId") // Maps 'projectId' field to JSON key
     private int projectId; // Unique ID of the project
 
@@ -96,7 +94,7 @@ public class Project implements Serializable, DataIdentifier {
     ) {
         this.title = title;
         this.boundToUser = user.getUsername();
-        this.addedAt = ZonedDateTime.now(ZoneId.of(String.valueOf(TimeZone.getTimeZone(APP_DEFAULT_TIMEZONE).toZoneId()))); // Set creation date and time to current date and time
+        this.addedAt = ZonedDateTime.now(ZoneId.of(APP_DEFAULT_TIMEZONE)); // Set creation date and time to current date and time
         this.status = 1; // Default status is 'Active'
     }
 
@@ -120,14 +118,19 @@ public class Project implements Serializable, DataIdentifier {
      */
     @Override
     @JsonIgnore
-    public void setId(
-            @NotNull(message = "Project ID cannot be null")
-            @PositiveOrZero(message = "Project ID must greater that or equal to 0")
-            @Min(value = 0, message = "Project ID must greater that or equal to 0")
-            @UniqueElements(message = "Project ID must be unique")
-            int projectId
-    ) {
+    public void setId(int projectId) {
         this.projectId = projectId;
+    }
+
+    /**
+     * Sets or Gets unique keys associated with the project.
+     *
+     * @return The list of unique keys.
+     */
+    @Override
+    @JsonIgnore
+    public List<String> uniqueKeys() {
+        return List.of("projectId"); // Specify unique keys
     }
 
     /**
@@ -149,7 +152,6 @@ public class Project implements Serializable, DataIdentifier {
             @NotNull(message = "Project ID cannot be null")
             @PositiveOrZero(message = "Project ID must greater that or equal to 0")
             @Min(value = 0, message = "Project ID must greater that or equal to 0")
-            @UniqueElements(message = "Project ID must be unique")
             int projectId
     ) {
         this.projectId = projectId;
@@ -208,7 +210,7 @@ public class Project implements Serializable, DataIdentifier {
             @NotNull(message = "User cannot be null")
             User user
     ) {
-        return addedAt.withZoneSameInstant(ZoneId.of(String.valueOf(TimeZone.getTimeZone(user.getTimezone()).toZoneId())));
+        return addedAt.withZoneSameInstant(ZoneId.of(user.getTimezone()));
     }
 
     /**
@@ -222,7 +224,7 @@ public class Project implements Serializable, DataIdentifier {
             @PastOrPresent(message = "Project creation date should be in the past")
             ZonedDateTime addedAt
     ) {
-        this.addedAt = addedAt.withZoneSameInstant(ZoneId.of(String.valueOf(TimeZone.getTimeZone(APP_DEFAULT_TIMEZONE).toZoneId())));
+        this.addedAt = addedAt.withZoneSameInstant(ZoneId.of(APP_DEFAULT_TIMEZONE));
     }
 
     /**

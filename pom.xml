@@ -23,9 +23,11 @@
         <java.version>17</java.version>
         <libphonenumber.version>8.13.37</libphonenumber.version>
         <batik.version>1.17</batik.version>
+        <glassfish.expressly.version>5.0.0</glassfish.expressly.version>
         <xmlgraphics.version>2.9</xmlgraphics.version>
         <sun.jna.version>3.0.9</sun.jna.version>
         <jackson.databind.version>2.17.1</jackson.databind.version>
+        <jakarta.validation.api.version>3.1.0</jakarta.validation.api.version>
         <hibernate.validator.version>8.0.1.Final</hibernate.validator.version>
         <main.class>com.zynotic.studios.quadsquad.questlog.App</main.class>
     </properties>
@@ -79,7 +81,18 @@
             <version>${batik.version}</version>
             <scope>compile</scope>
         </dependency>
-
+        <!-- https://mvnrepository.com/artifact/jakarta.validation/jakarta.validation-api -->
+        <dependency>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
+            <version>${jakarta.validation.api.version}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.glassfish.expressly/expressly -->
+        <dependency>
+            <groupId>org.glassfish.expressly</groupId>
+            <artifactId>expressly</artifactId>
+            <version>${glassfish.expressly.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
