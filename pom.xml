@@ -14,17 +14,19 @@
         <maven.resources.plugin.version>3.3.1</maven.resources.plugin.version>
         <maven.compiler.plugin.version>3.8.0</maven.compiler.plugin.version>
         <validatorfx.version>0.5.1</validatorfx.version>
-        <flowless.version>0.7.3</flowless.version>
         <atlantafx.base.version>2.0.1</atlantafx.base.version>
         <ikonli.javafx.version>12.3.1</ikonli.javafx.version>
-        <log4j.api.version>2.23.1</log4j.api.version>
+        <argon2.version>2.11</argon2.version>
+        <log4j.version>2.23.1</log4j.version>
         <ikonli.material2.pack.version>12.3.1</ikonli.material2.pack.version>
         <javafx.version>21.0.3</javafx.version>
         <java.version>17</java.version>
         <libphonenumber.version>8.13.37</libphonenumber.version>
         <batik.version>1.17</batik.version>
         <xmlgraphics.version>2.9</xmlgraphics.version>
+        <sun.jna.version>3.0.9</sun.jna.version>
         <jackson.databind.version>2.17.1</jackson.databind.version>
+        <hibernate.validator.version>8.0.1.Final</hibernate.validator.version>
         <main.class>com.zynotic.studios.quadsquad.questlog.App</main.class>
     </properties>
     <dependencies>
@@ -58,31 +60,44 @@
             <artifactId>ikonli-javafx</artifactId>
             <version>${ikonli.javafx.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.kordamp.ikonli</groupId>
             <artifactId>ikonli-material2-pack</artifactId>
             <version>${ikonli.material2.pack.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.fxmisc.flowless</groupId>
-            <artifactId>flowless</artifactId>
-            <version>${flowless.version}</version>
-        </dependency>
+
         <dependency>
             <groupId>net.synedra</groupId>
             <artifactId>validatorfx</artifactId>
             <version>${validatorfx.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-dom</artifactId>
             <version>${batik.version}</version>
             <scope>compile</scope>
         </dependency>
+
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
-            <version>${log4j.api.version}</version>
+            <version>${log4j.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>${log4j.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>de.mkammerer</groupId>
+            <artifactId>argon2-jvm-nolibs</artifactId>
+            <version>${argon2.version}</version>
             <scope>compile</scope>
         </dependency>
 
@@ -99,12 +114,34 @@
             <version>${batik.version}</version>
             <scope>compile</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.hibernate.validator</groupId>
+            <artifactId>hibernate-validator</artifactId>
+            <version>${hibernate.validator.version}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.sun.jna/jna -->
+        <dependency>
+            <groupId>com.sun.jna</groupId>
+            <artifactId>jna</artifactId>
+            <version>${sun.jna.version}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.datatype/jackson-datatype-jsr310 -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <version>${jackson.databind.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>xmlgraphics-commons</artifactId>
             <version>${xmlgraphics.version}</version>
             <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna</artifactId>
+            <version>5.13.0</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
     <build>

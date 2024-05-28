@@ -2,7 +2,6 @@ module com.zynotic.studios.quadsquad.questlog {
     requires javafx.controls;
     requires javafx.fxml;
     requires atlantafx.base;
-    requires org.fxmisc.flowless;
     requires net.synedra.validatorfx;
     requires java.logging;
     requires org.kordamp.ikonli.javafx;
@@ -11,6 +10,7 @@ module com.zynotic.studios.quadsquad.questlog {
     requires com.fasterxml.jackson.core;
     requires com.fasterxml.jackson.annotation;
     requires com.fasterxml.jackson.databind;
+    requires com.fasterxml.jackson.datatype.jsr310;
     requires libphonenumber;
     requires java.datatransfer;
     requires java.desktop;
@@ -18,10 +18,16 @@ module com.zynotic.studios.quadsquad.questlog {
     requires batik.bridge;
     requires batik.util;
     requires org.apache.logging.log4j;
+    requires org.apache.logging.log4j.core;
     requires xml.apis.ext;
     requires batik.css;
     requires jdk.xml.dom;
     requires batik.svg.dom;
+    requires de.mkammerer.argon2.nolibs;
+    requires java.sql;
+    requires org.hibernate.validator;
+    requires jakarta.validation;
+    requires com.sun.jna;
 
     opens com.zynotic.studios.quadsquad.questlog to javafx.fxml;
     opens com.zynotic.studios.quadsquad.questlog.entities to com.fasterxml.jackson.databind;
@@ -32,6 +38,8 @@ module com.zynotic.studios.quadsquad.questlog {
     exports com.zynotic.studios.quadsquad.questlog.services;
     exports com.zynotic.studios.quadsquad.questlog.enums;
     exports com.zynotic.studios.quadsquad.questlog.interfaces;
+    exports com.zynotic.studios.quadsquad.questlog.validation;
+    exports com.zynotic.studios.quadsquad.questlog.validation.validators;
     exports com.zynotic.studios.quadsquad.questlog.configs;
     exports com.zynotic.studios.quadsquad.questlog.utils;
     exports com.zynotic.studios.quadsquad.questlog.utils.misc;

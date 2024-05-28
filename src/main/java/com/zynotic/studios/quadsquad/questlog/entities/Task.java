@@ -17,13 +17,20 @@ package com.zynotic.studios.quadsquad.questlog.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-//
+import com.zynotic.studios.quadsquad.questlog.interfaces.DataIdentifier;
+import jakarta.validation.constraints.*;
+import org.hibernate.validator.constraints.Length;
+import org.hibernate.validator.constraints.Range;
+import org.hibernate.validator.constraints.UniqueElements;
+
 import java.io.Serial;
 import java.io.Serializable;
-//
-import java.util.Date;
-//
-import com.zynotic.studios.quadsquad.questlog.interfaces.DataIdentifier;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.Objects;
+import java.util.TimeZone;
+
+import static com.zynotic.studios.quadsquad.questlog.configs.AppConfig.getRequiredApplicationProperty;
 
 /**
  * Represents a task entity in the system.
@@ -34,30 +41,52 @@ public class Task implements Serializable, DataIdentifier {
     @Serial
     private static final long serialVersionUID = 1L;
 
+    @JsonIgnore
+    private static final String APP_DEFAULT_TIMEZONE = getRequiredApplicationProperty("APP_DEFAULT_TIMEZONE");
+
+    @NotNull(message = "Task ID cannot be null")
+    @PositiveOrZero(message = "Task ID must greater that or equal to 0")
+    @Min(value = 0, message = "Task ID must greater that or equal to 0")
+    @UniqueElements(message = "Task ID must be unique")
     @JsonProperty("taskId") // Maps 'taskId' field to JSON key
     private int taskId; // Unique ID of the task
 
+    @NotNull(message = "Project ID for Task cannot be null")
+    @PositiveOrZero(message = "Project ID for Task must greater that or equal to 0")
+    @Min(value = 0, message = "Project ID for Task must greater that or equal to 0")
     @JsonProperty("boundToProject") // Maps 'boundToProject' field to JSON key
     private int boundToProject; // ID of the project to which the task is bound
 
+    @NotNull(message = "Task title cannot be null")
+    @NotBlank(message = "Task title cannot be blank")
     @JsonProperty("title") // Maps 'title' field to JSON key
     private String title; // Title of the task
 
     @JsonProperty("description") // Maps 'description' field to JSON key
     private String description; // Description of the task
 
+    @NotNull(message = "Task due date cannot be null")
     @JsonProperty("dueDate") // Maps 'dueDate' field to JSON key
-    private Date dueDate; // Due date of the task
+    private ZonedDateTime dueDate; // Due date and time of the task
 
+    @NotNull(message = "Task creation date cannot be null")
+    @PastOrPresent(message = "Task creation date should be in past")
     @JsonProperty("addDate") // Maps 'addDate' field to JSON key
-    private Date addDate; // Date when the task was added
+    private ZonedDateTime addDate; // Date and time when the task was added
 
+    @NotNull(message = "Competed status cannot be null")
     @JsonProperty("completed") // Maps 'completed' field to JSON key
     private boolean completed; // Completion status of the task
 
+    @NotNull(message = "Username for Task cannot be null")
+    @NotBlank(message = "Username for Task cannot be blank")
+    @Length(min = 4, max = 30, message = "Username should be at least 4 characters long and less than 30")
+    @Pattern(regexp = "^[a-z0-9]+$", message = "Username can only contain letters (a-z) and digits (0-9)")
     @JsonProperty("boundToUser") // Maps 'boundToUser' field to JSON key
     private String boundToUser; // User to whom the task is bound
 
+    @NotNull(message = "Status cannot be null")
+    @Range(min = 0, max = 2, message = "Invalid status")
     @JsonProperty("status") // Maps 'status' field to JSON key
     private int status; // Status of the task: 0 - Deleted, 1 - Active, 2 - Archived
 
@@ -70,44 +99,37 @@ public class Task implements Serializable, DataIdentifier {
     /**
      * Constructs a new Task instance with specified parameters.
      *
-     * @param boundToProject ID of the project to which the task is bound
-     * @param title          Title of the task
-     * @param description    Description of the task
-     * @param dueDate        Due date of the task
-     * @param completed      Completion status of the task
-     * @param boundToUser    User to whom the task is bound
-     * @param status         Status of the task (0 - Deleted, 1 - Active, 2 - Archived)
+     * @param user        User to whom the task is bound.
+     * @param project     Project to which the task is bound.
+     * @param title       Title of the task.
+     * @param description Description of the task.
+     * @param dueDate     Due date and time of the task.
      */
-    public Task(int boundToProject, String title, String description, Date dueDate, boolean completed, String boundToUser, int status) {
-        this.boundToProject = boundToProject;
-        this.title = title;
-        this.description = description;
-        this.addDate = new Date(); // Set creation date to current date and time
-        this.dueDate = dueDate;
-        this.completed = completed;
-        this.boundToUser = boundToUser;
-        this.status = status;
-    }
+    public Task(
+            @NotNull(message = "User cannot be null")
+            User user,
 
-    /**
-     * Constructs a new Task instance with specified parameters (status defaults to 'Active').
-     *
-     * @param boundToProject ID of the project to which the task is bound
-     * @param title          Title of the task
-     * @param description    Description of the task
-     * @param dueDate        Due date of the task
-     * @param completed      Completion status of the task
-     * @param boundToUser    User to whom the task is bound
-     */
-    public Task(int boundToProject, String title, String description, Date dueDate, boolean completed, String boundToUser) {
-        this.boundToProject = boundToProject;
+            @NotNull(message = "Project cannot be null")
+            Project project,
+
+            @NotNull(message = "Task title cannot be null")
+            @NotBlank(message = "Task title cannot be blank")
+            String title,
+
+            String description,
+
+            @NotNull(message = "Task due date cannot be null")
+            @FutureOrPresent(message = "Task due date should be in future")
+            ZonedDateTime dueDate
+    ) {
+        this.boundToProject = project.getProjectId();
         this.title = title;
         this.description = description;
-        this.addDate = new Date(); // Set creation date to current date and time
-        this.dueDate = dueDate;
-        this.completed = completed;
-        this.boundToUser = boundToUser;
-        this.status = 1; // Default status is 'Active'
+        this.addDate = ZonedDateTime.now(ZoneId.of(String.valueOf(TimeZone.getTimeZone(APP_DEFAULT_TIMEZONE).toZoneId()))); // Set creation date and time to current date and time
+        this.dueDate = dueDate.withZoneSameInstant(ZoneId.of(String.valueOf(TimeZone.getTimeZone(APP_DEFAULT_TIMEZONE).toZoneId())));
+        this.completed = false;
+        this.boundToUser = user.getUsername();
+        this.status = 1;
     }
 
     /**
@@ -130,7 +152,13 @@ public class Task implements Serializable, DataIdentifier {
      */
     @Override
     @JsonIgnore
-    public void setId(int taskId) {
+    public void setId(
+            @NotNull(message = "Task ID cannot be null")
+            @PositiveOrZero(message = "Task ID must greater that or equal to 0")
+            @Min(value = 0, message = "Task ID must greater that or equal to 0")
+            @UniqueElements(message = "Task ID must be unique")
+            int taskId
+    ) {
         this.taskId = taskId;
     }
 
@@ -149,7 +177,13 @@ public class Task implements Serializable, DataIdentifier {
      *
      * @param taskId The task ID to set.
      */
-    private void setTaskId(int taskId) {
+    private void setTaskId(
+            @NotNull(message = "Task ID cannot be null")
+            @PositiveOrZero(message = "Task ID must greater that or equal to 0")
+            @Min(value = 0, message = "Task ID must greater that or equal to 0")
+            @UniqueElements(message = "Task ID must be unique")
+            int taskId
+    ) {
         this.taskId = taskId;
     }
 
@@ -165,10 +199,13 @@ public class Task implements Serializable, DataIdentifier {
     /**
      * Sets the ID of the project to which the task is bound.
      *
-     * @param boundToProject The ID of the project.
+     * @param project The project whose ID will be set.
      */
-    public void setBoundToProject(int boundToProject) {
-        this.boundToProject = boundToProject;
+    public void setBoundToProject(
+            @NotNull(message = "Project cannot be null")
+            Project project
+    ) {
+        this.boundToProject = project.getProjectId();
     }
 
     /**
@@ -185,7 +222,11 @@ public class Task implements Serializable, DataIdentifier {
      *
      * @param title The title of the task.
      */
-    public void setTitle(String title) {
+    public void setTitle(
+            @NotNull(message = "Task title cannot be null")
+            @NotBlank(message = "Task title cannot be blank")
+            String title
+    ) {
         this.title = title;
     }
 
@@ -208,39 +249,56 @@ public class Task implements Serializable, DataIdentifier {
     }
 
     /**
-     * Retrieves the due date of the task.
+     * Retrieves the due date and time of the task, adjusted to the user's timezone.
      *
-     * @return The due date of the task.
+     * @param user The user whose timezone will be used for the adjustment.
+     * @return The due date and time of the task, in the user's timezone.
      */
-    public Date getDueDate() {
-        return dueDate;
+    public ZonedDateTime getDueDate(
+            @NotNull(message = "User cannot be null")
+            User user
+    ) {
+        return dueDate.withZoneSameInstant(ZoneId.of(String.valueOf(TimeZone.getTimeZone(user.getTimezone()).toZoneId())));
     }
 
     /**
-     * Sets the due date of the task.
+     * Sets the due date and time of the task, adjusting it to the application's default timezone.
      *
-     * @param dueDate The due date of the task.
+     * @param dueDate The due date and time of the task.
      */
-    public void setDueDate(Date dueDate) {
-        this.dueDate = dueDate;
+    public void setDueDate(
+            @NotNull(message = "Task due date cannot be null")
+            @FutureOrPresent(message = "Task due date should be in future")
+            ZonedDateTime dueDate
+    ) {
+        this.dueDate = dueDate.withZoneSameInstant(ZoneId.of(String.valueOf(TimeZone.getTimeZone(APP_DEFAULT_TIMEZONE).toZoneId())));
     }
 
     /**
-     * Retrieves the date when the task was added.
+     * Retrieves the date and time when the task was added, adjusted to the user's timezone.
      *
-     * @return The date when the task was added.
+     * @param user The user whose timezone will be used for the adjustment.
+     * @return The date and time when the task was added, in the user's timezone.
      */
-    public Date getAddDate() {
-        return addDate;
+    public ZonedDateTime getAddDate(
+            @NotNull(message = "User cannot be null")
+            User user
+    ) {
+        return addDate.withZoneSameInstant(ZoneId.of(String.valueOf(TimeZone.getTimeZone(user.getTimezone()).toZoneId())));
     }
 
     /**
-     * Sets the date when the task was added.
+     * Sets the date and time when the task was added, adjusting it to the application's default timezone.
+     * Note: This method is private and should only be used internally.
      *
-     * @param addDate The date when the task was added.
+     * @param addDate The date and time when the task was added.
      */
-    public void setAddDate(Date addDate) {
-        this.addDate = addDate;
+    private void setAddDate(
+            @NotNull(message = "Task creation date cannot be null")
+            @PastOrPresent(message = "Task creation date should be in past")
+            ZonedDateTime addDate
+    ) {
+        this.addDate = addDate.withZoneSameInstant(ZoneId.of(String.valueOf(TimeZone.getTimeZone(APP_DEFAULT_TIMEZONE).toZoneId())));
     }
 
     /**
@@ -257,7 +315,10 @@ public class Task implements Serializable, DataIdentifier {
      *
      * @param completed True if the task is completed, otherwise false.
      */
-    public void setCompleted(boolean completed) {
+    public void setCompleted(
+            @NotNull(message = "Competed status cannot be null")
+            boolean completed
+    ) {
         this.completed = completed;
     }
 
@@ -271,12 +332,15 @@ public class Task implements Serializable, DataIdentifier {
     }
 
     /**
-     * Sets the user to whom the task is bound.
+     * Sets the username of the user to whom the task is bound.
      *
-     * @param boundToUser The user to whom the task is bound.
+     * @param user The user object representing the user to whom the task is bound.
      */
-    public void setBoundToUser(String boundToUser) {
-        this.boundToUser = boundToUser;
+    public void setBoundToUser(
+            @NotNull(message = "User cannot be null")
+            User user
+    ) {
+        this.boundToUser = user.getUsername();
     }
 
     /**
@@ -293,7 +357,35 @@ public class Task implements Serializable, DataIdentifier {
      *
      * @param status The status of the task (0: Deleted, 1: Active, 2: Archived).
      */
-    public void setStatus(int status) {
+    public void setStatus(
+            @NotNull(message = "Status cannot be null")
+            @Range(min = 0, max = 2, message = "Invalid status")
+            int status
+    ) {
         this.status = status;
+    }
+
+    /**
+     * Indicates whether some other object is "equal to" this one.
+     *
+     * @param o The reference object with which to compare.
+     * @return {@code true} if this object is the same as the obj argument; {@code false} otherwise.
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Task that = (Task) o;
+        return taskId == that.taskId;
+    }
+
+    /**
+     * Returns a hash code value for the object.
+     *
+     * @return A hash code value for this object.
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(taskId);
     }
 }

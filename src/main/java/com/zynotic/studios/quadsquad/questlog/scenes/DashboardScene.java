@@ -2,9 +2,13 @@ package com.zynotic.studios.quadsquad.questlog.scenes;
 
 import atlantafx.base.theme.Styles;
 import atlantafx.base.theme.Tweaks;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.zynotic.studios.quadsquad.questlog.components.DashboardTasks;
 import com.zynotic.studios.quadsquad.questlog.components.DashboardToday;
 import com.zynotic.studios.quadsquad.questlog.entities.Project;
+import com.zynotic.studios.quadsquad.questlog.entities.User;
+import com.zynotic.studios.quadsquad.questlog.entities.UserPhoneNumber;
+import com.zynotic.studios.quadsquad.questlog.enums.Gender;
 import com.zynotic.studios.quadsquad.questlog.services.DataService;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
@@ -19,9 +23,9 @@ import org.kordamp.ikonli.material2.Material2OutlinedMZ;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.*;
 
 public class DashboardScene {
     DataService<Project> projectService = new DataService<>("database/projects.json", Project.class);
@@ -33,6 +37,10 @@ public class DashboardScene {
     private int loadedProjectsCount = 0;
 
     public DashboardScene(Stage primaryStage) throws IOException, URISyntaxException {
+        Set<String> allZoneIds = ZoneId.getAvailableZoneIds();
+
+        // Print each zone ID
+        allZoneIds.forEach(System.out::println);
         this.primaryStage = primaryStage;
         primaryStage.setTitle("QuestLog - Dashboard > Task");
 
@@ -165,7 +173,7 @@ public class DashboardScene {
 
     public void addProject(String projectName) {
         TreeItem<String> projectItem = new TreeItem<>(projectName, new FontIcon(Material2OutlinedMZ.WORK));
-        Project newProject = new Project(projectName, "newUser");
+        Project newProject = new Project(new User("Md Asaduzzaman Atik", LocalDate.parse("2003-06-06"), Gender.MALE, "mrasadatik", "MrasadatiK@", "asadatik.dev@gmail.com", new UserPhoneNumber("BD", "1712699511", PhoneNumberUtil.PhoneNumberType.MOBILE)), projectName);
         try {
             projectService.addData(newProject);
             for (TreeItem<String> item : dashboardMenu.getChildren()) {

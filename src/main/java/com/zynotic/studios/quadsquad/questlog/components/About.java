@@ -5,6 +5,7 @@ import atlantafx.base.controls.Tile;
 import atlantafx.base.theme.Styles; 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.zynotic.studios.quadsquad.questlog.configs.AppConfig;
 import com.zynotic.studios.quadsquad.questlog.entities.UserPhoneNumber;
 import com.zynotic.studios.quadsquad.questlog.utils.OpenLink;
@@ -197,7 +198,7 @@ public class About {
                 String personalEmail = sortedProjectGroupMembersJson.get(i).get("personal_email").asText();
                 String institutionEmail = studentID + "@" + INSTITUTION_DOMAIN_STUDENT;
                 JsonNode phoneNumberJson = sortedProjectGroupMembersJson.get(i).get("phone_number");
-                UserPhoneNumber phoneNumber = new UserPhoneNumber(phoneNumberJson.get("country_code").asText(), phoneNumberJson.get("country_calling_code").asText(), phoneNumberJson.get("national_number").asText());
+                UserPhoneNumber phoneNumber = new UserPhoneNumber(phoneNumberJson.get("country_code").asText(), phoneNumberJson.get("national_number").asText(), PhoneNumberUtil.PhoneNumberType.MOBILE);
 
                 String memberDescription = String.format("""
                                 [b]Student ID:[/b] %s
@@ -210,8 +211,8 @@ public class About {
                         institutionEmail,
                         personalEmail,
                         personalEmail,
-                        phoneNumber.getInternationalNumber(),
-                        phoneNumber.getInternationalNumber());
+                        phoneNumber.getNumber(PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL),
+                        phoneNumber.getNumber(PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL));
 
                 ImageView profile = new ImageView(new Image("/assets/images/members/" + institutionEmail + ".jpg"));
                 profile.setFitWidth(64);

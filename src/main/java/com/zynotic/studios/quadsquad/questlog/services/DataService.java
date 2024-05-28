@@ -20,15 +20,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 //
 import java.io.*;
 //
+import java.lang.reflect.Field;
+//
 import java.util.List;
 import java.util.Optional;
 //
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.zynotic.studios.quadsquad.questlog.interfaces.DataIdentifier;
 import com.zynotic.studios.quadsquad.questlog.utils.DataContainer;
 
 /**
  * Service class for managing data operations.
- * Supports reading, writing, adding, updating, and deleting data.
+ * Supports reading, writing, detecting duplicate key-value pair, adding, updating, and deleting data.
  * @param <P> The type of data entity implementing the DataIdentifier interface.
  */
 public class DataService<P extends DataIdentifier> {
@@ -43,6 +46,7 @@ public class DataService<P extends DataIdentifier> {
      */
     public DataService(String dataFileLocation, Class<P> typeParameterClass) {
         this.objectMapper = new ObjectMapper();
+        this.objectMapper.registerModule(new JavaTimeModule());
         this.DATA_FILE_PATH = dataFileLocation;
         this.typeParameterClass = typeParameterClass;
     }
@@ -93,6 +97,30 @@ public class DataService<P extends DataIdentifier> {
             // Error handling for file writing
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Checks if the provided key-value pair matches any existing data.
+     *
+     * @param key   The key to check against existing data.
+     * @param value The value to check against existing data.
+     * @return True if the key-value pair matches existing data, false otherwise.
+     */
+    public boolean isDuplicate(String key, Object value) {
+        List<P> allData = readData();
+        for (P data : allData) {
+            try {
+                Field field = typeParameterClass.getDeclaredField(key);
+                field.setAccessible(true);
+                Object fieldValue = field.get(data);
+                if (fieldValue != null && fieldValue.equals(value)) {
+                    return true;
+                }
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+        return false;
     }
 
     /**

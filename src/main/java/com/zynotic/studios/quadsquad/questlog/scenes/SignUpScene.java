@@ -7,6 +7,10 @@ import atlantafx.base.theme.Styles;
 import atlantafx.base.theme.Tweaks;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.zynotic.studios.quadsquad.questlog.QuestLog;
+import com.zynotic.studios.quadsquad.questlog.entities.User;
+import com.zynotic.studios.quadsquad.questlog.entities.UserPhoneNumber;
+import com.zynotic.studios.quadsquad.questlog.enums.Gender;
+import com.zynotic.studios.quadsquad.questlog.services.DataService;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.HPos;
@@ -25,21 +29,38 @@ import org.kordamp.ikonli.javafx.FontIcon;
 import org.kordamp.ikonli.material2.Material2OutlinedAL;
 import org.kordamp.ikonli.material2.Material2OutlinedMZ;
 
+import net.synedra.validatorfx.Validator;
+
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static com.zynotic.studios.quadsquad.questlog.entities.UserPhoneNumber.*;
+import static com.zynotic.studios.quadsquad.questlog.validation.InputValidation.*;
 
 public class SignUpScene {
+    DataService<User> usersService = new DataService<User>("database/users.json", User.class);
     private final StackPane root;
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ISO_DATE;
-    LocalDate today = LocalDate.now(ZoneId.of("Asia/Dhaka"));
-    private record CountryCallingCodeWithFlag(String text) {}
+    LocalDate today = LocalDate.now(ZoneId.systemDefault());
+    private Validator validator = new Validator();
+    private final AtomicBoolean touchedName = new AtomicBoolean(false);
+    private final AtomicBoolean touchedUsername = new AtomicBoolean(false);
+    private final AtomicBoolean touchedEmail = new AtomicBoolean(false);
+    private final AtomicBoolean touchedPhoneNumber = new AtomicBoolean(false);
+    private final AtomicBoolean touchedDateOfBirth = new AtomicBoolean(false);
+    private final AtomicBoolean touchedGender = new AtomicBoolean(false);
+    private final AtomicBoolean touchedPassword = new AtomicBoolean(false);
+    private final AtomicBoolean touchedConfirmedPassword = new AtomicBoolean(false);
+    
+    private final String[] countryCodes = getCountries();
+
+    public record CountryCallingCodeWithFlag(String text) {}
 
     private static class CountryCallingCodeWithFlagCell extends ListCell<CountryCallingCodeWithFlag> {
         @Override
@@ -60,6 +81,31 @@ public class SignUpScene {
         }
     }
 
+    public record GenderBadge(String text) {}
+
+    private static class GenderBadgeCell extends ListCell<GenderBadge> {
+        @Override
+        protected void updateItem(GenderBadge genderBadge, boolean isEmpty) {
+            super.updateItem(genderBadge, isEmpty);
+
+            if (isEmpty) {
+                setGraphic(null);
+                setText(null);
+            } else {
+                setGraphic(null);
+                setText(genderBadge.text());
+            }
+        }
+    }
+
+    private class PastDateCell extends DateCell {
+        @Override
+        public void updateItem(LocalDate date, boolean empty) {
+            super.updateItem(date, empty);
+            setDisable(empty | date.isAfter(today));
+        }
+    }
+
     public SignUpScene(Stage primaryStage) throws IOException {
         primaryStage.setTitle("QuestLog - Sign Up");
 
@@ -69,7 +115,6 @@ public class SignUpScene {
         GridPane signUpForm = new GridPane();
         HBox signUpActionBtnGroup = new HBox();
         VBox signUpFormHeader = new VBox();
-        String[] countryCodes = getCountries();
 
         ImageView appLogo = new ImageView(new Image("/assets/images/logo/questlog/questlog--horizontal--light.png"));
         appLogo.setFitHeight(50);
@@ -97,53 +142,106 @@ public class SignUpScene {
 
         signUpFormHeader.getChildren().addAll(signUpIcon, signUpHeading);
 
-        CustomTextField name = new CustomTextField();
-        name.setPromptText("Enter your full name");
-        name.setLeft(new FontIcon(Material2OutlinedMZ.PERSON_ADD_ALT_1));
-        name.setPrefWidth(280);
-        Label nameErrorMessage = new Label(" ");
+        CustomTextField nameField = new CustomTextField();
+        Label nameLabel = new Label("Name");
+        nameLabel.setMaxWidth(280);
+        nameLabel.setLabelFor(nameField);
+        nameField.setPromptText("Enter your full name");
+        nameField.setLeft(new FontIcon(Material2OutlinedMZ.PERSON_ADD_ALT_1));
+        nameField.setPrefWidth(280);
+        Text nameErrorMessage = new Text(" ");
+        nameErrorMessage.setWrappingWidth(280);
+        nameErrorMessage.getStyleClass().addAll(Styles.TEXT);
+        validator.createCheck()
+                .dependsOn("name", nameField.textProperty())
+                .withMethod(c -> validatorName(c, touchedName))
+                .decoratingWith(m -> signUpFormDecorator(m, new CustomTextField[]{nameField}, null, null))
+                .decorates(nameErrorMessage)
+                .immediate();
 
-        CustomTextField username = new CustomTextField();
-        username.setPromptText("Enter an username");
-        username.setLeft(new FontIcon(Material2OutlinedAL.ALTERNATE_EMAIL));
-        username.setPrefWidth(280);
-        Label usernameErrorMessage = new Label(" ");
+        CustomTextField usernameField = new CustomTextField();
+        Label usernameLabel = new Label("Username");
+        usernameLabel.setMaxWidth(280);
+        usernameLabel.setLabelFor(usernameField);
+        usernameField.setPromptText("Enter an username");
+        usernameField.setLeft(new FontIcon(Material2OutlinedAL.ALTERNATE_EMAIL));
+        usernameField.setPrefWidth(280);
+        Text usernameErrorMessage = new Text(" ");
+        usernameErrorMessage.setWrappingWidth(280);
+        usernameErrorMessage.getStyleClass().addAll(Styles.TEXT);
+        validator.createCheck()
+                .dependsOn("username", usernameField.textProperty())
+                .withMethod(c -> validatorUsername(c, usersService, touchedUsername))
+                .decoratingWith(m -> signUpFormDecorator(m, new CustomTextField[]{usernameField}, null, null))
+                .decorates(usernameErrorMessage)
+                .immediate();
 
-        CustomTextField email = new CustomTextField();
-        email.setPromptText("Enter your email address");
-        email.setLeft(new FontIcon(Material2OutlinedAL.EMAIL));
-        email.setPrefWidth(280);
-        Label emailErrorMessage = new Label(" ");
+        CustomTextField emailField = new CustomTextField();
+        Label emailLabel = new Label("Email");
+        emailLabel.setMaxWidth(280);
+        emailLabel.setLabelFor(emailField);
+        emailField.setPromptText("Enter your email address");
+        emailField.setLeft(new FontIcon(Material2OutlinedAL.EMAIL));
+        emailField.setPrefWidth(280);
+        Text emailErrorMessage = new Text(" ");
+        emailErrorMessage.setWrappingWidth(280);
+        emailErrorMessage.getStyleClass().addAll(Styles.TEXT);
+        validator.createCheck()
+                .dependsOn("email", emailField.textProperty())
+                .withMethod(c -> validatorEmail(c, usersService, touchedEmail))
+                .decoratingWith(m -> signUpFormDecorator(m, new CustomTextField[]{emailField}, null, null))
+                .decorates(emailErrorMessage)
+                .immediate();
 
-        CustomTextField phoneNumberSubscriberNumber = new CustomTextField();
+        CustomTextField phoneNumberSubscriberNumberField = new CustomTextField();
 
         ObservableList<CountryCallingCodeWithFlag> countryCodeComboBoxItems = Arrays.stream(countryCodes).map(CountryCallingCodeWithFlag::new).collect(Collectors.toCollection(
                 FXCollections::observableArrayList
         ));
 
-        ComboBox<CountryCallingCodeWithFlag> phoneNumberCountryCodeInput = new ComboBox<>(countryCodeComboBoxItems);
-        phoneNumberCountryCodeInput.setPrefWidth(170);
-        phoneNumberCountryCodeInput.getStyleClass().add(Tweaks.ALT_ICON);
-        phoneNumberCountryCodeInput.setButtonCell(new CountryCallingCodeWithFlagCell());
-        phoneNumberCountryCodeInput.setCellFactory(c -> new CountryCallingCodeWithFlagCell());
-        phoneNumberCountryCodeInput.setPlaceholder(new Label("Loading..."));
-        phoneNumberCountryCodeInput.getSelectionModel().select(new CountryCallingCodeWithFlag("BD"));
-        phoneNumberCountryCodeInput.setOnAction(e -> {
-            phoneNumberSubscriberNumber.setPromptText(getExampleNumber(phoneNumberCountryCodeInput.getSelectionModel().getSelectedItem().text(), PhoneNumberUtil.PhoneNumberType.MOBILE));
+        ComboBox<CountryCallingCodeWithFlag> phoneNumberCountryCodeInputField = new ComboBox<>(countryCodeComboBoxItems);
+        phoneNumberCountryCodeInputField.setPrefWidth(170);
+        phoneNumberCountryCodeInputField.getStyleClass().add(Tweaks.ALT_ICON);
+        phoneNumberCountryCodeInputField.setButtonCell(new CountryCallingCodeWithFlagCell());
+        phoneNumberCountryCodeInputField.setCellFactory(c -> new CountryCallingCodeWithFlagCell());
+        phoneNumberCountryCodeInputField.setPlaceholder(new Label("Loading..."));
+        phoneNumberCountryCodeInputField.getSelectionModel().select(new CountryCallingCodeWithFlag("BD"));
+        CustomTextField phoneNumberCountryCodeField = new CustomTextField();
+        phoneNumberCountryCodeField.setVisible(false);
+        phoneNumberCountryCodeField.setText(new CountryCallingCodeWithFlag("BD").text());
+        phoneNumberCountryCodeInputField.setOnAction(e -> {
+            phoneNumberSubscriberNumberField.setPromptText(getExampleNumber(phoneNumberCountryCodeInputField.getSelectionModel().getSelectedItem().text(), PhoneNumberUtil.PhoneNumberType.MOBILE));
+            phoneNumberCountryCodeField.setText(phoneNumberCountryCodeInputField.getSelectionModel().getSelectedItem().text());
         });
 
 
-        phoneNumberSubscriberNumber.setPromptText(getExampleNumber(phoneNumberCountryCodeInput.getSelectionModel().getSelectedItem().text(), PhoneNumberUtil.PhoneNumberType.MOBILE));
-        Label phoneNumberErrorMessage = new Label(" ");
+        phoneNumberSubscriberNumberField.setPromptText(getExampleNumber(phoneNumberCountryCodeInputField.getSelectionModel().getSelectedItem().text(), PhoneNumberUtil.PhoneNumberType.MOBILE));
 
-        InputGroup phoneNumber = new InputGroup(phoneNumberCountryCodeInput, phoneNumberSubscriberNumber);
-        phoneNumber.setPrefWidth(280);
+        InputGroup phoneNumberField = new InputGroup(phoneNumberCountryCodeInputField, phoneNumberSubscriberNumberField);
+        phoneNumberField.setPrefWidth(280);
+        Label phoneNumberLabel = new Label("Phone Number");
+        phoneNumberLabel.setMaxWidth(280);
+        phoneNumberLabel.setLabelFor(phoneNumberField);
+        Text phoneNumberErrorMessage = new Text(" ");
+        phoneNumberErrorMessage.setWrappingWidth(280);
+        phoneNumberErrorMessage.getStyleClass().addAll(Styles.TEXT);
+        validator.createCheck()
+                .dependsOn("phoneNumberCountryCode", phoneNumberCountryCodeField.textProperty())
+                .dependsOn("phoneNumberSubscriberNumber", phoneNumberSubscriberNumberField.textProperty())
+                .withMethod(c -> validatorPhoneNumber(c, usersService, touchedPhoneNumber))
+                .decoratingWith(m -> signUpFormDecorator(m, new CustomTextField[]{phoneNumberSubscriberNumberField}, new ComboBox<?>[]{phoneNumberCountryCodeInputField}, null))
+                .decorates(phoneNumberErrorMessage)
+                .immediate();
 
-        DatePicker dateOfBirth = new DatePicker();
-        dateOfBirth.setPromptText("yyyy-MM-dd");
-        dateOfBirth.setEditable(true);
-        dateOfBirth.setPrefWidth(280);
-        dateOfBirth.setConverter(new StringConverter<>() {
+        DatePicker dateOfBirthField = new DatePicker();
+        Label dateOfBirthLabel = new Label("Date of Birth (Georgian Calendar)");
+        dateOfBirthLabel.setMaxWidth(280);
+        dateOfBirthLabel.setLabelFor(dateOfBirthField);
+        dateOfBirthField.setPromptText("yyyy-MM-dd");
+        dateOfBirthField.setEditable(true);
+        dateOfBirthField.setPrefWidth(280);
+        dateOfBirthField.setDayCellFactory(c -> new PastDateCell());
+        dateOfBirthField.setConverter(new StringConverter<>() {
             @Override
             public String toString(LocalDate localDate) {
                 if (localDate == null) {
@@ -164,29 +262,81 @@ public class SignUpScene {
                 }
             }
         });
-        Label dateOfBirthErrorMessage = new Label(" ");
+        Text dateOfBirthErrorMessage = new Text(" ");
+        dateOfBirthErrorMessage.setWrappingWidth(280);
+        dateOfBirthErrorMessage.getStyleClass().addAll(Styles.TEXT);
+        validator.createCheck()
+                .dependsOn("dateOfBirth", dateOfBirthField.getEditor().textProperty())
+                .withMethod(c -> validatorDateOfBirth(c, touchedDateOfBirth))
+                .decoratingWith(m -> signUpFormDecorator(m, new Control[]{dateOfBirthField.getEditor(), dateOfBirthField}, null, null))
+                .decorates(dateOfBirthErrorMessage)
+                .immediate();
 
-        PasswordTextField password = new PasswordTextField();
-        password.setPromptText("Enter a new password");
-        password.setLeft(new FontIcon(Material2OutlinedAL.LOCK));
-        password.setPrefWidth(280);
-        Label passwordErrorMessage = new Label(" ");
+        ObservableList<GenderBadge> genderComboBoxItems = Arrays.stream(Gender.values())
+                .map(gender -> new GenderBadge(gender.name()))
+                .collect(Collectors.toCollection(FXCollections::observableArrayList));
 
-        PasswordTextField confirmPassword = new PasswordTextField();
-        confirmPassword.setPromptText("Re-type your password");
-        confirmPassword.setLeft(new FontIcon(Material2OutlinedAL.LOCK));
-        confirmPassword.setPrefWidth(280);
-        Label confirmPasswordErrorMessage = new Label(" ");
+        ComboBox<GenderBadge> genderField = new ComboBox<>(genderComboBoxItems);
+        Label genderLabel = new Label("Gender");
+        genderLabel.setMaxWidth(280);
+        genderLabel.setLabelFor(genderField);
+        genderField.setPrefWidth(280);
+        genderField.getStyleClass().add(Tweaks.ALT_ICON);
+        genderField.setButtonCell(new GenderBadgeCell());
+        genderField.setCellFactory(c -> new GenderBadgeCell());
+        genderField.setPlaceholder(new Label("Loading..."));
+        // gender.getSelectionModel().select(new GenderBadge("MALE"));
+        Text genderErrorMessage = new Text(" ");
+        genderErrorMessage.setWrappingWidth(280);
+        genderErrorMessage.getStyleClass().addAll(Styles.TEXT);
+        CustomTextField genderValidationHelper = new CustomTextField();
+        genderValidationHelper.setVisible(false);
+        genderField.setOnAction(e -> genderValidationHelper.setText(genderField.getSelectionModel().getSelectedItem().text()));
+        validator.createCheck()
+                .dependsOn("gender", genderValidationHelper.textProperty())
+                .withMethod(c -> validatorGender(c, touchedGender))
+                .decoratingWith(m -> signUpFormDecorator(m, null, new ComboBox<?>[]{genderField}, null))
+                .decorates(genderErrorMessage)
+                .immediate();
 
-        FontIcon passwordToggleIcon= new FontIcon(Material2OutlinedMZ.VISIBILITY_OFF);
-        passwordToggleIcon.setCursor(Cursor.HAND);
-        passwordToggleIcon.setOnMouseClicked(e -> {
-            passwordToggleIcon.setIconCode(password.getRevealPassword() ? Material2OutlinedMZ.VISIBILITY_OFF : Material2OutlinedMZ.VISIBILITY);
-            password.setRevealPassword(!password.getRevealPassword());
-            confirmPassword.setRevealPassword(password.getRevealPassword());
-        });
+        PasswordTextField passwordField = new PasswordTextField();
+        Label passwordLabel = new Label("Password");
+        passwordLabel.setMaxWidth(280);
+        passwordLabel.setLabelFor(passwordField);
+        passwordField.setPromptText("Enter a new password");
+        passwordField.setLeft(new FontIcon(Material2OutlinedAL.LOCK));
+        passwordField.setPrefWidth(280);
+        Text passwordErrorMessage = new Text(" ");
+        passwordErrorMessage.setWrappingWidth(280);
+        passwordErrorMessage.getStyleClass().addAll(Styles.TEXT);
+        validator.createCheck()
+                .dependsOn("password", passwordField.passwordProperty())
+                .withMethod(c -> validatorPassword(c, touchedPassword))
+                .decoratingWith(m -> signUpFormDecorator(m, null, null, new PasswordTextField[]{passwordField}))
+                .decorates(passwordErrorMessage)
+                .immediate();
 
-        password.setRight(passwordToggleIcon);
+        PasswordTextField confirmPasswordField = new PasswordTextField();
+        Label confirmPasswordLabel = new Label("Confirm Password");
+        confirmPasswordLabel.setMaxWidth(280);
+        confirmPasswordLabel.setLabelFor(confirmPasswordField);
+        confirmPasswordField.setPromptText("Re-type your password");
+        confirmPasswordField.setLeft(new FontIcon(Material2OutlinedAL.LOCK));
+        confirmPasswordField.setPrefWidth(280);
+        Text confirmPasswordErrorMessage = new Text(" ");
+        confirmPasswordErrorMessage.setWrappingWidth(280);
+        confirmPasswordErrorMessage.getStyleClass().addAll(Styles.TEXT);
+        validator.createCheck()
+                .dependsOn("confirmPassword", confirmPasswordField.passwordProperty())
+                .dependsOn("password", passwordField.passwordProperty())
+                .withMethod(c -> validatorConfirmPassword(c, touchedConfirmedPassword))
+                .decoratingWith(m -> signUpFormDecorator(m, null, null, new PasswordTextField[]{confirmPasswordField}))
+                .decorates(confirmPasswordErrorMessage)
+                .immediate();
+
+        FontIcon passwordToggleIcon = getPasswordToggleIcon(passwordField, confirmPasswordField);
+
+        passwordField.setRight(passwordToggleIcon);
 
         Button haveAccountBtn = new Button("Already have an account?");
         haveAccountBtn.getStyleClass().addAll(Styles.FLAT);
@@ -202,21 +352,93 @@ public class SignUpScene {
         signUpActionBtnGroup.getChildren().addAll(haveAccountBtn, signUpBtn);
 
         signUpForm.addRow(0, signUpFormHeader);
-        signUpForm.addRow(1, new VBox(5, new Label("Name"), name, nameErrorMessage));
-        signUpForm.addRow(2, new VBox(5, new Label("Username"), username, usernameErrorMessage));
-        signUpForm.addRow(3, new VBox(5, new Label("Email"), email, emailErrorMessage));
-        signUpForm.addRow(4, new VBox(5, new Label("Phone"), phoneNumber, phoneNumberErrorMessage));
-        signUpForm.addRow(5, new VBox(5, new Label("Date of Birth"), dateOfBirth, dateOfBirthErrorMessage));
-        signUpForm.addRow(6, new VBox(5, new Label("Password"), password, passwordErrorMessage));
-        signUpForm.addRow(7, new VBox(5, new Label("Confirm Password"), confirmPassword, confirmPasswordErrorMessage));
-        GridPane.setConstraints(signUpActionBtnGroup, 0, 8, 1, 1, HPos.RIGHT, VPos.CENTER);
+        signUpForm.addRow(1, new VBox(5, nameLabel, nameField, nameErrorMessage));
+        signUpForm.addRow(2, new VBox(5, usernameLabel, usernameField, usernameErrorMessage));
+        signUpForm.addRow(3, new VBox(5, emailLabel, emailField, emailErrorMessage));
+        signUpForm.addRow(4, new VBox(5, phoneNumberLabel, phoneNumberField, phoneNumberErrorMessage));
+        signUpForm.addRow(5, new VBox(5, dateOfBirthLabel, dateOfBirthField, dateOfBirthErrorMessage));
+        signUpForm.addRow(6, new VBox(5, genderLabel, genderField, genderErrorMessage));
+        signUpForm.addRow(7, new VBox(5, passwordLabel, passwordField, passwordErrorMessage));
+        signUpForm.addRow(8, new VBox(5, confirmPasswordLabel, confirmPasswordField, confirmPasswordErrorMessage));
+        GridPane.setConstraints(signUpActionBtnGroup, 0, 9, 1, 1, HPos.RIGHT, VPos.CENTER);
 
-        signUpForm.getChildren().addAll(signUpActionBtnGroup);
+        signUpForm.getChildren().add(9, signUpActionBtnGroup);
 
         signUpFormScrollWrapper.setContent(signUpForm);
         signUpFormScrollWrapper.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         signUpFormScrollWrapper.setFitToHeight(true);
         signUpFormScrollWrapper.setFitToWidth(true);
+
+        signUpBtn.setOnAction(e -> {
+            String name = nameField.getText();
+            boolean nameError = false;
+            LocalDate dateOfBirth = null;
+            boolean dateOfBirthError = false;
+            Gender gender = null;
+            boolean genderError = false;
+            String username = usernameField.getText();
+            boolean usernameError = false;
+            String password = passwordField.getPassword();
+            boolean passwordError = false;
+            String email = emailField.getText();
+            boolean emailError = false;
+            String phoneNumberCountryCode = null;
+            String phoneNumberSubscriberNumber = null;
+            boolean phoneNumberError = false;
+
+            if (name.isBlank()) {
+                touchedName.set(true);
+                nameError = true;
+            }
+
+            if (dateOfBirthField.getValue() == null) {
+                touchedDateOfBirth.set(true);
+                dateOfBirthError = true;
+            } else {
+                dateOfBirth = dateOfBirthField.getValue();
+            }
+
+            if (genderField.getSelectionModel().getSelectedItem() == null) {
+                touchedGender.set(true);
+                genderError = true;
+            } else {
+                gender = Gender.valueOf(genderField.getSelectionModel().getSelectedItem().text());
+            }
+
+            if (username.isBlank()) {
+                touchedUsername.set(true);
+                usernameError = true;
+            }
+
+            if (password.isBlank()) {
+                touchedPassword.set(true);
+                touchedConfirmedPassword.set(true);
+                passwordError = true;
+            }
+
+            if (email.isBlank()) {
+                touchedEmail.set(true);
+                emailError = true;
+            }
+
+            if (phoneNumberCountryCodeInputField.getSelectionModel().getSelectedItem() == null || phoneNumberSubscriberNumberField.getText().isBlank()) {
+                touchedPhoneNumber.set(true);
+                phoneNumberError = true;
+            } else {
+                phoneNumberCountryCode = phoneNumberCountryCodeInputField.getSelectionModel().getSelectedItem().text();
+                phoneNumberSubscriberNumber = phoneNumberSubscriberNumberField.getText();
+            }
+
+            if (!nameError && !dateOfBirthError && !genderError && !usernameError && !passwordError && !emailError && !phoneNumberError) {
+                try {
+                    signUp(name, dateOfBirth, gender, username, password, email, phoneNumberCountryCode, phoneNumberSubscriberNumber);
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+            } else {
+                validator.validate();
+            }
+        });
 
         // Add elements to the root
         sceneRoot.setTop(topBar);
@@ -224,7 +446,25 @@ public class SignUpScene {
 
         root.getChildren().addAll(sceneRoot);
     }
+
+    private static FontIcon getPasswordToggleIcon(PasswordTextField passwordField, PasswordTextField confirmPasswordField) {
+        FontIcon passwordToggleIcon= new FontIcon(Material2OutlinedMZ.VISIBILITY_OFF);
+        passwordToggleIcon.setCursor(Cursor.HAND);
+        passwordToggleIcon.setOnMouseClicked(e -> {
+            passwordToggleIcon.setIconCode(passwordField.getRevealPassword() ? Material2OutlinedMZ.VISIBILITY_OFF : Material2OutlinedMZ.VISIBILITY);
+            passwordField.setRevealPassword(!passwordField.getRevealPassword());
+            confirmPasswordField.setRevealPassword(passwordField.getRevealPassword());
+        });
+        return passwordToggleIcon;
+    }
+
     public StackPane getRoot() {
         return root;
+    }
+
+    private void signUp(String name, LocalDate dateOfBirth, Gender gender, String username, String password, String email, String phoneNumberCountryCode, String phoneNumberSubscriberNumber) throws IOException {
+        UserPhoneNumber newUserPhoneNumber = new UserPhoneNumber(phoneNumberCountryCode, phoneNumberSubscriberNumber, PhoneNumberUtil.PhoneNumberType.MOBILE);
+        User newUser = new User(name, dateOfBirth, gender, username, password, email, newUserPhoneNumber);
+        usersService.addData(newUser);
     }
 }
