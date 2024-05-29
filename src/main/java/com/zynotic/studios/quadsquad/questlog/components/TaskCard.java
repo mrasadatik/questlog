@@ -3,6 +3,8 @@ package com.zynotic.studios.quadsquad.questlog.components;
 import atlantafx.base.controls.Card;
 import atlantafx.base.controls.Tile;
 import atlantafx.base.theme.Styles;
+import com.zynotic.studios.quadsquad.questlog.entities.Task;
+import com.zynotic.studios.quadsquad.questlog.services.DataService;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -20,7 +22,7 @@ import javax.swing.text.Style;
 
 public class TaskCard {
     Card taskCard;
-    public TaskCard(String taskID) {
+    public TaskCard(Task task, DataService<Task> taskService) {
         taskCard = new Card();
 
         HBox actionComplete = new HBox();
@@ -50,15 +52,25 @@ public class TaskCard {
         CheckBox checkAsComplete = new CheckBox();
         taskCard.getStyleClass().addAll(Styles.INTERACTIVE);
         taskCard.setPrefWidth(Region.USE_COMPUTED_SIZE);
+        checkAsComplete.setOnAction(e -> {
+            if (checkAsComplete.isSelected()) {
+                task.setCompleted(true);
+                taskService.updateData(task);
+            }
+        });
 
         Button deleteTaskBtn = new Button(null, new FontIcon(Material2OutlinedAL.DELETE));
         deleteTaskBtn.getStyleClass().addAll(Styles.BUTTON_CIRCLE, Styles.ROUNDED, Styles.DANGER, Styles.BUTTON_OUTLINED);
         deleteTaskBtn.setMnemonicParsing(true);
+        deleteTaskBtn.setOnAction(e -> {
+            task.setStatus(0);
+            taskService.updateData(task);
+        });
 
         actionComplete.getChildren().addAll(checkAsComplete);
         actionDelete.getChildren().addAll(deleteTaskBtn);
 
-        Tile taskCardHeaderContent = new Tile("Task Title" + taskID, "Task description", null);
+        Tile taskCardHeaderContent = new Tile(task.getTitle(), task.getDescription());
         HBox.setHgrow(taskCardHeaderContent, Priority.ALWAYS);
 
         taskCardHeader.getChildren().addAll(actionComplete, taskCardHeaderContent, actionDelete);

@@ -21,7 +21,6 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -32,7 +31,7 @@ import static com.zynotic.studios.quadsquad.questlog.entities.UserPhoneNumber.ge
 /**
  * Utility class for input validation
  */
-public class InputValidation {
+public class SignUpInputValidation {
     // Constants for date formatting
     private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ISO_DATE;
     private static final String APP_DEFAULT_TIMEZONE = getRequiredApplicationProperty("APP_DEFAULT_TIMEZONE");
@@ -40,10 +39,10 @@ public class InputValidation {
     private static final String APP_AGE = getRequiredApplicationProperty("APP_AGE");
 
     // Regular expressions and patterns for validation
-    public static final String regexName = "^(?!.*(?:\\s\\s|-{2,}|'{2,})).{2,}(?:\\s(?!.*(?:\\s\\s|-{2,}|'{2,})).{2,})+$";
-    public static final String regexUsername = "^[a-z0-9]+$";
+    public static final String regexName = "^(?=.{5,100}$)(?!.*(?:\\s\\s|-{2,}|'{2,})).{2,}(?:\\s(?!.*(?:\\s\\s|-{2,}|'{2,})).{2,})+$";
+    public static final String regexUsername = "^(?=.{4,30}$)[a-z0-9]+$";
     public static final String regexDate = "^\\d{4}-\\d{2}-\\d{2}$";
-    public static final String regexEmail = "^([^\\x00-\\x20\\x22\\x28\\x29\\x2c\\x2e\\x3a-\\x3c\\x3e\\x40\\x5b-\\x5d\\x7f-\\xff]+|\\x22([^\\x0d\\x22\\x5c\\x80-\\xff]|\\x5c[\\x00-\\x7f])*\\x22)(\\x2e([^\\x00-\\x20\\x22\\x28\\x29\\x2c\\x2e\\x3a-\\x3c\\x3e\\x40\\x5b-\\x5d\\x7f-\\xff]+|\\x22([^\\x0d\\x22\\x5c\\x80-\\xff]|\\x5c[\\x00-\\x7f])*\\x22))*\\x40([^\\x00-\\x20\\x22\\x28\\x29\\x2c\\x2e\\x3a-\\x3c\\x3e\\x40\\x5b-\\x5d\\x7f-\\xff]+|\\x5b([^\\x0d\\x5b-\\x5d\\x80-\\xff]|\\x5c[\\x00-\\x7f])*\\x5d)(\\x2e([^\\x00-\\x20\\x22\\x28\\x29\\x2c\\x2e\\x3a-\\x3c\\x3e\\x40\\x5b-\\x5d\\x7f-\\xff]+|\\x5b([^\\x0d\\x5b-\\x5d\\x80-\\xff]|\\x5c[\\x00-\\x7f])*\\x5d))*$";
+    public static final String regexEmail = "^(?=.{5,99}$)(([_a-z0-9]+[._a-z0-9]*)(\\+[a-z0-9]+)?@(([a-z0-9-]+\\.)[a-z]{2,}))$";
     public static final String regexPassword = "^(?=.*\\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[^\\w\\d\\s:])([^\\s]){8,}$";
     private static final Pattern patternName = Pattern.compile(regexName);
     private static final Pattern patternDate = Pattern.compile(regexDate);

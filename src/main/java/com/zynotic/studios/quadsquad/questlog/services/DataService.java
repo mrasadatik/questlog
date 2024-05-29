@@ -151,13 +151,14 @@ public class DataService<P extends DataIdentifier> {
                 System.out.println("Validation error: " + violation.getMessage());
             }
         } else {
+            data.setId(getNextDataId());
+
             for (String key : uniqueKeys) {
                 if (isDuplicate(key, getFieldValue(data, key))) {
                     return;
                 }
             }
 
-            data.setId(getNextDataId());
             List<P> allData = readData();
             allData.add(data);
             writeData(allData);
@@ -225,6 +226,29 @@ public class DataService<P extends DataIdentifier> {
      */
     public Optional<P> getDataById(int dataId) {
         return readData().stream().filter(data -> data.getId() == dataId).findFirst();
+    }
+
+    /**
+     * Retrieves data by a specific key-value pair.
+     *
+     * @param key   The key to filter by.
+     * @param value The value to filter by.
+     * @return An optional containing the data matching the key-value pair, if found.
+     */
+    public Optional<P> getDataByKeyValue(String key, Object value) {
+        return readData().stream()
+                .filter(data -> {
+                    try {
+                        Field field = typeParameterClass.getDeclaredField(key);
+                        field.setAccessible(true);
+                        Object fieldValue = field.get(data);
+                        return Objects.equals(fieldValue, value);
+                    } catch (NoSuchFieldException | IllegalAccessException e) {
+                        e.printStackTrace();
+                        return false;
+                    }
+                })
+                .findFirst();
     }
 
     /**

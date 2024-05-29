@@ -1,1 +1,1 @@
-{"data":[]}
+{"data":[{"userId":0,"name":"Md Asaduzzaman Atik","dateOfBirth":[2003,1,1],"gender":"MALE","username":"mrasadatik","password":{"charset":"UTF-8","hashLength":32,"rawHashedPassword":"nakc5obYqUcBnLYrRVjbkyeMmvOWrCnm+tRVZKmMUUE=","salt":"ooA6yfBMf7/2PwsBTZ/svg=="},"email":"asadatik.dev@gmail.com","phoneNumber":{"countryCode":"BD","countryCallingCode":"880","nationalNumber":"01712-699511","numberType":"MOBILE"},"timezone":"UTC","addedAt":1716957705.759837100,"status":1}]}

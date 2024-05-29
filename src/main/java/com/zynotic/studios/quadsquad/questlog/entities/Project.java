@@ -191,13 +191,13 @@ public class Project implements Serializable, DataIdentifier {
     /**
      * Sets the user to whom the project is bound.
      *
-     * @param user The user to whom the project is bound. The username of this user will be set.
+     * @param username The user to whom the project is bound. The username of this user will be set.
      */
     public void setBoundToUser(
             @NotNull(message = "User cannot be null")
-            User user
+            String username
     ) {
-        this.boundToUser = user.getUsername();
+        this.boundToUser = username;
     }
 
     /**

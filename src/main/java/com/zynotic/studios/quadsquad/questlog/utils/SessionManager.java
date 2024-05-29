@@ -1,38 +1,29 @@
 package com.zynotic.studios.quadsquad.questlog.utils;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import org.hibernate.validator.constraints.Length;
-import org.hibernate.validator.constraints.UniqueElements;
+import com.zynotic.studios.quadsquad.questlog.entities.User;
 
 public class SessionManager {
 
-    @NotNull
-    private boolean isLoggedIn = false;
+    private boolean isSignedIn = false;
 
-    @NotBlank
-    @Length(min = 4, max = 30)
-    @UniqueElements
-    @Pattern(regexp = "^[a-z0-9]+$")
-    private String username;
+    private User user;
 
-    public boolean isLoggedIn() {
-        return isLoggedIn;
+    public boolean isSignedIn() {
+        return isSignedIn;
     }
 
-    public String getUsername() {
-        return username;
+    public User getUser() {
+        return user;
     }
 
-    public void login(@NotBlank @Length(min = 4, max = 30) @UniqueElements @Pattern(regexp = "^[a-z0-9]+$") String username) {
-        isLoggedIn = true;
-        this.username = username;
+    public void signInSuccess(User user) {
+        isSignedIn = true;
+        this.user = user;
     }
 
-    public void logout() {
-        isLoggedIn = false;
-        this.username = null;
+    public void signOut() {
+        isSignedIn = false;
+        this.user = null;
     }
 }
 

@@ -8,9 +8,11 @@ import atlantafx.base.theme.Tweaks;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.zynotic.studios.quadsquad.questlog.QuestLog;
 import com.zynotic.studios.quadsquad.questlog.entities.User;
+import com.zynotic.studios.quadsquad.questlog.entities.UserPassword;
 import com.zynotic.studios.quadsquad.questlog.entities.UserPhoneNumber;
 import com.zynotic.studios.quadsquad.questlog.enums.Gender;
 import com.zynotic.studios.quadsquad.questlog.services.DataService;
+import com.zynotic.studios.quadsquad.questlog.utils.SessionManager;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.HPos;
@@ -25,7 +27,6 @@ import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
-import org.hibernate.validator.HibernateValidator;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.kordamp.ikonli.material2.Material2OutlinedAL;
 import org.kordamp.ikonli.material2.Material2OutlinedMZ;
@@ -43,7 +44,7 @@ import java.util.stream.Collectors;
 
 import static com.zynotic.studios.quadsquad.questlog.configs.AppConfig.getRequiredApplicationProperty;
 import static com.zynotic.studios.quadsquad.questlog.entities.UserPhoneNumber.*;
-import static com.zynotic.studios.quadsquad.questlog.validation.InputValidation.*;
+import static com.zynotic.studios.quadsquad.questlog.validation.SignUpInputValidation.*;
 
 public class SignUpScene {
     DataService<User> usersService = new DataService<User>("database/users.json", User.class);
@@ -109,339 +110,339 @@ public class SignUpScene {
         }
     }
 
-    public SignUpScene(Stage primaryStage) throws IOException {
-
-        primaryStage.setTitle("QuestLog - Sign Up");
+    public SignUpScene(Stage primaryStage, SessionManager sessionManager) throws IOException {
 
         root = new StackPane();
         BorderPane sceneRoot = new BorderPane();
-        ScrollPane signUpFormScrollWrapper = new ScrollPane();
-        GridPane signUpForm = new GridPane();
-        HBox signUpActionBtnGroup = new HBox();
-        VBox signUpFormHeader = new VBox();
 
-        ImageView appLogo = new ImageView(new Image("/assets/images/logo/questlog/questlog--horizontal--light.png"));
-        appLogo.setFitHeight(50);
-        appLogo.setPreserveRatio(true);
+        if (!sessionManager.isSignedIn()) {
 
-        final ToolBar topBar = new ToolBar(
-                appLogo
-        );
+            primaryStage.setTitle("QuestLog - Sign Up");
 
-        signUpForm.setVgap(10);
-        signUpForm.setHgap(10);
-        signUpForm.setPadding(new Insets(25));
-        signUpForm.setAlignment(Pos.CENTER);
+            ScrollPane signUpFormScrollWrapper = new ScrollPane();
+            GridPane signUpForm = new GridPane();
+            HBox signUpActionBtnGroup = new HBox();
+            VBox signUpFormHeader = new VBox();
 
-        signUpFormHeader.setSpacing(10);
-        signUpFormHeader.setPadding(new Insets(10));
-        signUpFormHeader.setAlignment(Pos.CENTER);
+            ImageView appLogo = new ImageView(new Image("/assets/images/logo/questlog/questlog--horizontal--light.png"));
+            appLogo.setFitHeight(50);
+            appLogo.setPreserveRatio(true);
 
-        ImageView signUpIcon = new ImageView(new Image("/assets/images/graphics/icons/sign_up.png"));
-        signUpIcon.setFitHeight(50);
-        signUpIcon.setPreserveRatio(true);
+            final ToolBar topBar = new ToolBar(
+                    appLogo
+            );
 
-        Text signUpHeading = new Text("Sign Up");
-        signUpHeading.getStyleClass().addAll(Styles.TITLE_2);
+            signUpForm.setVgap(10);
+            signUpForm.setHgap(10);
+            signUpForm.setPadding(new Insets(25));
+            signUpForm.setAlignment(Pos.CENTER);
 
-        signUpFormHeader.getChildren().addAll(signUpIcon, signUpHeading);
+            signUpFormHeader.setSpacing(10);
+            signUpFormHeader.setPadding(new Insets(10));
+            signUpFormHeader.setAlignment(Pos.CENTER);
 
-        CustomTextField nameField = new CustomTextField();
-        Label nameLabel = new Label("Name");
-        nameLabel.setMaxWidth(280);
-        nameLabel.setLabelFor(nameField);
-        nameField.setPromptText("Enter your full name");
-        nameField.setLeft(new FontIcon(Material2OutlinedMZ.PERSON_ADD_ALT_1));
-        nameField.setPrefWidth(280);
-        Text nameErrorMessage = new Text(" ");
-        nameErrorMessage.setWrappingWidth(280);
-        nameErrorMessage.getStyleClass().addAll(Styles.TEXT);
-        validator.createCheck()
-                .dependsOn("name", nameField.textProperty())
-                .withMethod(c -> validatorName(c, touchedName))
-                .decoratingWith(m -> signUpFormDecorator(m, new CustomTextField[]{nameField}, null, null))
-                .decorates(nameErrorMessage)
-                .immediate();
+            ImageView signUpIcon = new ImageView(new Image("/assets/images/graphics/icons/sign_up.png"));
+            signUpIcon.setFitHeight(50);
+            signUpIcon.setPreserveRatio(true);
 
-        CustomTextField usernameField = new CustomTextField();
-        Label usernameLabel = new Label("Username");
-        usernameLabel.setMaxWidth(280);
-        usernameLabel.setLabelFor(usernameField);
-        usernameField.setPromptText("Enter an username");
-        usernameField.setLeft(new FontIcon(Material2OutlinedAL.ALTERNATE_EMAIL));
-        usernameField.setPrefWidth(280);
-        Text usernameErrorMessage = new Text(" ");
-        usernameErrorMessage.setWrappingWidth(280);
-        usernameErrorMessage.getStyleClass().addAll(Styles.TEXT);
-        validator.createCheck()
-                .dependsOn("username", usernameField.textProperty())
-                .withMethod(c -> validatorUsername(c, usersService, touchedUsername))
-                .decoratingWith(m -> signUpFormDecorator(m, new CustomTextField[]{usernameField}, null, null))
-                .decorates(usernameErrorMessage)
-                .immediate();
+            Text signUpHeading = new Text("Sign Up");
+            signUpHeading.getStyleClass().addAll(Styles.TITLE_2);
 
-        CustomTextField emailField = new CustomTextField();
-        Label emailLabel = new Label("Email");
-        emailLabel.setMaxWidth(280);
-        emailLabel.setLabelFor(emailField);
-        emailField.setPromptText("Enter your email address");
-        emailField.setLeft(new FontIcon(Material2OutlinedAL.EMAIL));
-        emailField.setPrefWidth(280);
-        Text emailErrorMessage = new Text(" ");
-        emailErrorMessage.setWrappingWidth(280);
-        emailErrorMessage.getStyleClass().addAll(Styles.TEXT);
-        validator.createCheck()
-                .dependsOn("email", emailField.textProperty())
-                .withMethod(c -> validatorEmail(c, usersService, touchedEmail))
-                .decoratingWith(m -> signUpFormDecorator(m, new CustomTextField[]{emailField}, null, null))
-                .decorates(emailErrorMessage)
-                .immediate();
+            signUpFormHeader.getChildren().addAll(signUpIcon, signUpHeading);
 
-        CustomTextField phoneNumberSubscriberNumberField = new CustomTextField();
+            CustomTextField nameField = new CustomTextField();
+            Label nameLabel = new Label("Name");
+            nameLabel.setMaxWidth(280);
+            nameLabel.setLabelFor(nameField);
+            nameField.setPromptText("Enter your full name");
+            nameField.setLeft(new FontIcon(Material2OutlinedMZ.PERSON_ADD_ALT_1));
+            nameField.setPrefWidth(280);
+            Text nameErrorMessage = new Text(" ");
+            nameErrorMessage.setWrappingWidth(280);
+            nameErrorMessage.getStyleClass().addAll(Styles.TEXT);
+            validator.createCheck()
+                    .dependsOn("name", nameField.textProperty())
+                    .withMethod(c -> validatorName(c, touchedName))
+                    .decoratingWith(m -> signUpFormDecorator(m, new CustomTextField[]{nameField}, null, null))
+                    .decorates(nameErrorMessage)
+                    .immediate();
 
-        ObservableList<CountryCallingCodeWithFlag> countryCodeComboBoxItems = Arrays.stream(countryCodes).map(CountryCallingCodeWithFlag::new).collect(Collectors.toCollection(
-                FXCollections::observableArrayList
-        ));
+            CustomTextField usernameField = new CustomTextField();
+            Label usernameLabel = new Label("Username");
+            usernameLabel.setMaxWidth(280);
+            usernameLabel.setLabelFor(usernameField);
+            usernameField.setPromptText("Enter an username");
+            usernameField.setLeft(new FontIcon(Material2OutlinedAL.ALTERNATE_EMAIL));
+            usernameField.setPrefWidth(280);
+            Text usernameErrorMessage = new Text(" ");
+            usernameErrorMessage.setWrappingWidth(280);
+            usernameErrorMessage.getStyleClass().addAll(Styles.TEXT);
+            validator.createCheck()
+                    .dependsOn("username", usernameField.textProperty())
+                    .withMethod(c -> validatorUsername(c, usersService, touchedUsername))
+                    .decoratingWith(m -> signUpFormDecorator(m, new CustomTextField[]{usernameField}, null, null))
+                    .decorates(usernameErrorMessage)
+                    .immediate();
 
-        ComboBox<CountryCallingCodeWithFlag> phoneNumberCountryCodeInputField = new ComboBox<>(countryCodeComboBoxItems);
-        phoneNumberCountryCodeInputField.setPrefWidth(170);
-        phoneNumberCountryCodeInputField.getStyleClass().add(Tweaks.ALT_ICON);
-        phoneNumberCountryCodeInputField.setButtonCell(new CountryCallingCodeWithFlagCell());
-        phoneNumberCountryCodeInputField.setCellFactory(c -> new CountryCallingCodeWithFlagCell());
-        phoneNumberCountryCodeInputField.setPlaceholder(new Label("Loading..."));
-        phoneNumberCountryCodeInputField.getSelectionModel().select(new CountryCallingCodeWithFlag("BD"));
-        CustomTextField phoneNumberCountryCodeField = new CustomTextField();
-        phoneNumberCountryCodeField.setVisible(false);
-        phoneNumberCountryCodeField.setText(new CountryCallingCodeWithFlag("BD").text());
-        phoneNumberCountryCodeInputField.setOnAction(e -> {
+            CustomTextField emailField = new CustomTextField();
+            Label emailLabel = new Label("Email");
+            emailLabel.setMaxWidth(280);
+            emailLabel.setLabelFor(emailField);
+            emailField.setPromptText("Enter your email address");
+            emailField.setLeft(new FontIcon(Material2OutlinedAL.EMAIL));
+            emailField.setPrefWidth(280);
+            Text emailErrorMessage = new Text(" ");
+            emailErrorMessage.setWrappingWidth(280);
+            emailErrorMessage.getStyleClass().addAll(Styles.TEXT);
+            validator.createCheck()
+                    .dependsOn("email", emailField.textProperty())
+                    .withMethod(c -> validatorEmail(c, usersService, touchedEmail))
+                    .decoratingWith(m -> signUpFormDecorator(m, new CustomTextField[]{emailField}, null, null))
+                    .decorates(emailErrorMessage)
+                    .immediate();
+
+            CustomTextField phoneNumberSubscriberNumberField = new CustomTextField();
+
+            ObservableList<CountryCallingCodeWithFlag> countryCodeComboBoxItems = Arrays.stream(countryCodes).map(CountryCallingCodeWithFlag::new).collect(Collectors.toCollection(
+                    FXCollections::observableArrayList
+            ));
+
+            ComboBox<CountryCallingCodeWithFlag> phoneNumberCountryCodeInputField = new ComboBox<>(countryCodeComboBoxItems);
+            phoneNumberCountryCodeInputField.setPrefWidth(170);
+            phoneNumberCountryCodeInputField.getStyleClass().add(Tweaks.ALT_ICON);
+            phoneNumberCountryCodeInputField.setButtonCell(new CountryCallingCodeWithFlagCell());
+            phoneNumberCountryCodeInputField.setCellFactory(c -> new CountryCallingCodeWithFlagCell());
+            phoneNumberCountryCodeInputField.setPlaceholder(new Label("Loading..."));
+            phoneNumberCountryCodeInputField.getSelectionModel().select(new CountryCallingCodeWithFlag("BD"));
+            CustomTextField phoneNumberCountryCodeField = new CustomTextField();
+            phoneNumberCountryCodeField.setVisible(false);
+            phoneNumberCountryCodeField.setText(new CountryCallingCodeWithFlag("BD").text());
+            phoneNumberCountryCodeInputField.setOnAction(e -> {
+                phoneNumberSubscriberNumberField.setPromptText(getExampleNumber(phoneNumberCountryCodeInputField.getSelectionModel().getSelectedItem().text(), PhoneNumberUtil.PhoneNumberType.MOBILE));
+                phoneNumberCountryCodeField.setText(phoneNumberCountryCodeInputField.getSelectionModel().getSelectedItem().text());
+            });
+
+
             phoneNumberSubscriberNumberField.setPromptText(getExampleNumber(phoneNumberCountryCodeInputField.getSelectionModel().getSelectedItem().text(), PhoneNumberUtil.PhoneNumberType.MOBILE));
-            phoneNumberCountryCodeField.setText(phoneNumberCountryCodeInputField.getSelectionModel().getSelectedItem().text());
-        });
 
+            InputGroup phoneNumberField = new InputGroup(phoneNumberCountryCodeInputField, phoneNumberSubscriberNumberField);
+            phoneNumberField.setPrefWidth(280);
+            Label phoneNumberLabel = new Label("Phone Number");
+            phoneNumberLabel.setMaxWidth(280);
+            phoneNumberLabel.setLabelFor(phoneNumberField);
+            Text phoneNumberErrorMessage = new Text(" ");
+            phoneNumberErrorMessage.setWrappingWidth(280);
+            phoneNumberErrorMessage.getStyleClass().addAll(Styles.TEXT);
+            validator.createCheck()
+                    .dependsOn("phoneNumberCountryCode", phoneNumberCountryCodeField.textProperty())
+                    .dependsOn("phoneNumberSubscriberNumber", phoneNumberSubscriberNumberField.textProperty())
+                    .withMethod(c -> validatorPhoneNumber(c, usersService, touchedPhoneNumber))
+                    .decoratingWith(m -> signUpFormDecorator(m, new CustomTextField[]{phoneNumberSubscriberNumberField}, new ComboBox<?>[]{phoneNumberCountryCodeInputField}, null))
+                    .decorates(phoneNumberErrorMessage)
+                    .immediate();
 
-        phoneNumberSubscriberNumberField.setPromptText(getExampleNumber(phoneNumberCountryCodeInputField.getSelectionModel().getSelectedItem().text(), PhoneNumberUtil.PhoneNumberType.MOBILE));
-
-        InputGroup phoneNumberField = new InputGroup(phoneNumberCountryCodeInputField, phoneNumberSubscriberNumberField);
-        phoneNumberField.setPrefWidth(280);
-        Label phoneNumberLabel = new Label("Phone Number");
-        phoneNumberLabel.setMaxWidth(280);
-        phoneNumberLabel.setLabelFor(phoneNumberField);
-        Text phoneNumberErrorMessage = new Text(" ");
-        phoneNumberErrorMessage.setWrappingWidth(280);
-        phoneNumberErrorMessage.getStyleClass().addAll(Styles.TEXT);
-        validator.createCheck()
-                .dependsOn("phoneNumberCountryCode", phoneNumberCountryCodeField.textProperty())
-                .dependsOn("phoneNumberSubscriberNumber", phoneNumberSubscriberNumberField.textProperty())
-                .withMethod(c -> validatorPhoneNumber(c, usersService, touchedPhoneNumber))
-                .decoratingWith(m -> signUpFormDecorator(m, new CustomTextField[]{phoneNumberSubscriberNumberField}, new ComboBox<?>[]{phoneNumberCountryCodeInputField}, null))
-                .decorates(phoneNumberErrorMessage)
-                .immediate();
-
-        DatePicker dateOfBirthField = new DatePicker();
-        Label dateOfBirthLabel = new Label("Date of Birth (Georgian Calendar)");
-        dateOfBirthLabel.setMaxWidth(280);
-        dateOfBirthLabel.setLabelFor(dateOfBirthField);
-        dateOfBirthField.setPromptText("yyyy-MM-dd");
-        dateOfBirthField.setEditable(true);
-        dateOfBirthField.setPrefWidth(280);
-        dateOfBirthField.setDayCellFactory(c -> new PastDateCell());
-        dateOfBirthField.setConverter(new StringConverter<>() {
-            @Override
-            public String toString(LocalDate localDate) {
-                if (localDate == null) {
-                    return "";
+            DatePicker dateOfBirthField = new DatePicker();
+            Label dateOfBirthLabel = new Label("Date of Birth (Georgian Calendar)");
+            dateOfBirthLabel.setMaxWidth(280);
+            dateOfBirthLabel.setLabelFor(dateOfBirthField);
+            dateOfBirthField.setPromptText("yyyy-MM-dd");
+            dateOfBirthField.setEditable(true);
+            dateOfBirthField.setPrefWidth(280);
+            dateOfBirthField.setDayCellFactory(c -> new PastDateCell());
+            dateOfBirthField.setConverter(new StringConverter<>() {
+                @Override
+                public String toString(LocalDate localDate) {
+                    if (localDate == null) {
+                        return "";
+                    }
+                    return dateFormatter.format(localDate);
                 }
-                return dateFormatter.format(localDate);
-            }
 
-            @Override
-            public LocalDate fromString(String dateString) {
-                if (dateString == null || dateString.trim().isEmpty()) {
-                    return today;
+                @Override
+                public LocalDate fromString(String dateString) {
+                    if (dateString == null || dateString.trim().isEmpty()) {
+                        return today;
+                    }
+                    try {
+                        return LocalDate.parse(dateString, dateFormatter);
+                    } catch (DateTimeParseException e) {
+                        return today;
+                    }
                 }
-                try {
-                    return LocalDate.parse(dateString, dateFormatter);
-                } catch (DateTimeParseException e) {
-                    return today;
+            });
+            Text dateOfBirthErrorMessage = new Text(" ");
+            dateOfBirthErrorMessage.setWrappingWidth(280);
+            dateOfBirthErrorMessage.getStyleClass().addAll(Styles.TEXT);
+            validator.createCheck()
+                    .dependsOn("dateOfBirth", dateOfBirthField.getEditor().textProperty())
+                    .withMethod(c -> validatorDateOfBirth(c, touchedDateOfBirth))
+                    .decoratingWith(m -> signUpFormDecorator(m, new Control[]{dateOfBirthField.getEditor(), dateOfBirthField}, null, null))
+                    .decorates(dateOfBirthErrorMessage)
+                    .immediate();
+
+            ObservableList<GenderBadge> genderComboBoxItems = Arrays.stream(Gender.values())
+                    .map(gender -> new GenderBadge(gender.name()))
+                    .collect(Collectors.toCollection(FXCollections::observableArrayList));
+
+            ComboBox<GenderBadge> genderField = new ComboBox<>(genderComboBoxItems);
+            Label genderLabel = new Label("Gender");
+            genderLabel.setMaxWidth(280);
+            genderLabel.setLabelFor(genderField);
+            genderField.setPrefWidth(280);
+            genderField.getStyleClass().add(Tweaks.ALT_ICON);
+            genderField.setButtonCell(new GenderBadgeCell());
+            genderField.setCellFactory(c -> new GenderBadgeCell());
+            genderField.setPlaceholder(new Label("Loading..."));
+            // gender.getSelectionModel().select(new GenderBadge("MALE"));
+            Text genderErrorMessage = new Text(" ");
+            genderErrorMessage.setWrappingWidth(280);
+            genderErrorMessage.getStyleClass().addAll(Styles.TEXT);
+            CustomTextField genderValidationHelper = new CustomTextField();
+            genderValidationHelper.setVisible(false);
+            genderField.setOnAction(e -> genderValidationHelper.setText(genderField.getSelectionModel().getSelectedItem().text()));
+            validator.createCheck()
+                    .dependsOn("gender", genderValidationHelper.textProperty())
+                    .withMethod(c -> validatorGender(c, touchedGender))
+                    .decoratingWith(m -> signUpFormDecorator(m, null, new ComboBox<?>[]{genderField}, null))
+                    .decorates(genderErrorMessage)
+                    .immediate();
+
+            PasswordTextField passwordField = new PasswordTextField();
+            Label passwordLabel = new Label("Password");
+            passwordLabel.setMaxWidth(280);
+            passwordLabel.setLabelFor(passwordField);
+            passwordField.setPromptText("Enter a new password");
+            passwordField.setLeft(new FontIcon(Material2OutlinedAL.LOCK));
+            passwordField.setPrefWidth(280);
+            Text passwordErrorMessage = new Text(" ");
+            passwordErrorMessage.setWrappingWidth(280);
+            passwordErrorMessage.getStyleClass().addAll(Styles.TEXT);
+            validator.createCheck()
+                    .dependsOn("password", passwordField.passwordProperty())
+                    .withMethod(c -> validatorPassword(c, touchedPassword))
+                    .decoratingWith(m -> signUpFormDecorator(m, null, null, new PasswordTextField[]{passwordField}))
+                    .decorates(passwordErrorMessage)
+                    .immediate();
+
+            PasswordTextField confirmPasswordField = new PasswordTextField();
+            Label confirmPasswordLabel = new Label("Confirm Password");
+            confirmPasswordLabel.setMaxWidth(280);
+            confirmPasswordLabel.setLabelFor(confirmPasswordField);
+            confirmPasswordField.setPromptText("Re-type your password");
+            confirmPasswordField.setLeft(new FontIcon(Material2OutlinedAL.LOCK));
+            confirmPasswordField.setPrefWidth(280);
+            Text confirmPasswordErrorMessage = new Text(" ");
+            confirmPasswordErrorMessage.setWrappingWidth(280);
+            confirmPasswordErrorMessage.getStyleClass().addAll(Styles.TEXT);
+            validator.createCheck()
+                    .dependsOn("confirmPassword", confirmPasswordField.passwordProperty())
+                    .dependsOn("password", passwordField.passwordProperty())
+                    .withMethod(c -> validatorConfirmPassword(c, touchedConfirmedPassword))
+                    .decoratingWith(m -> signUpFormDecorator(m, null, null, new PasswordTextField[]{confirmPasswordField}))
+                    .decorates(confirmPasswordErrorMessage)
+                    .immediate();
+
+            FontIcon passwordToggleIcon = getPasswordToggleIcon(passwordField, confirmPasswordField);
+
+            passwordField.setRight(passwordToggleIcon);
+
+            Button haveAccountBtn = new Button("Already have an account?");
+            haveAccountBtn.getStyleClass().addAll(Styles.FLAT);
+            haveAccountBtn.setMnemonicParsing(true);
+            haveAccountBtn.setOnAction(e -> QuestLog.viewSignInScene());
+
+            Button signUpBtn = new Button("Sign Up", new FontIcon(Material2OutlinedAL.LOG_IN));
+            signUpBtn.getStyleClass().addAll(Styles.SUCCESS);
+            signUpBtn.setMnemonicParsing(true);
+
+            signUpActionBtnGroup.setSpacing(10);
+            signUpActionBtnGroup.setAlignment(Pos.CENTER_RIGHT);
+            signUpActionBtnGroup.getChildren().addAll(haveAccountBtn, signUpBtn);
+
+            signUpForm.addRow(0, signUpFormHeader);
+            signUpForm.addRow(1, new VBox(5, nameLabel, nameField, nameErrorMessage));
+            signUpForm.addRow(2, new VBox(5, usernameLabel, usernameField, usernameErrorMessage));
+            signUpForm.addRow(3, new VBox(5, emailLabel, emailField, emailErrorMessage));
+            signUpForm.addRow(4, new VBox(5, phoneNumberLabel, phoneNumberField, phoneNumberErrorMessage));
+            signUpForm.addRow(5, new VBox(5, dateOfBirthLabel, dateOfBirthField, dateOfBirthErrorMessage));
+            signUpForm.addRow(6, new VBox(5, genderLabel, genderField, genderErrorMessage));
+            signUpForm.addRow(7, new VBox(5, passwordLabel, passwordField, passwordErrorMessage));
+            signUpForm.addRow(8, new VBox(5, confirmPasswordLabel, confirmPasswordField, confirmPasswordErrorMessage));
+            GridPane.setConstraints(signUpActionBtnGroup, 0, 9, 1, 1, HPos.RIGHT, VPos.CENTER);
+
+            signUpForm.getChildren().add(9, signUpActionBtnGroup);
+
+            signUpFormScrollWrapper.setContent(signUpForm);
+            signUpFormScrollWrapper.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+            signUpFormScrollWrapper.setFitToHeight(true);
+            signUpFormScrollWrapper.setFitToWidth(true);
+
+            signUpBtn.setOnAction(e -> {
+                boolean hasError = false;
+
+                String name = nameField.getText();
+                LocalDate dateOfBirth = null;
+                Gender gender = null;
+                String username = usernameField.getText();
+                String password = passwordField.getPassword();
+                String email = emailField.getText();
+                String phoneNumberCountryCode = null;
+                String phoneNumberSubscriberNumber = null;
+
+                if (name.isBlank()) {
+                    touchedName.set(true);
+                    hasError = true;
                 }
-            }
-        });
-        Text dateOfBirthErrorMessage = new Text(" ");
-        dateOfBirthErrorMessage.setWrappingWidth(280);
-        dateOfBirthErrorMessage.getStyleClass().addAll(Styles.TEXT);
-        validator.createCheck()
-                .dependsOn("dateOfBirth", dateOfBirthField.getEditor().textProperty())
-                .withMethod(c -> validatorDateOfBirth(c, touchedDateOfBirth))
-                .decoratingWith(m -> signUpFormDecorator(m, new Control[]{dateOfBirthField.getEditor(), dateOfBirthField}, null, null))
-                .decorates(dateOfBirthErrorMessage)
-                .immediate();
 
-        ObservableList<GenderBadge> genderComboBoxItems = Arrays.stream(Gender.values())
-                .map(gender -> new GenderBadge(gender.name()))
-                .collect(Collectors.toCollection(FXCollections::observableArrayList));
+                if (dateOfBirthField.getValue() == null) {
+                    touchedDateOfBirth.set(true);
+                    hasError = true;
+                } else {
+                    dateOfBirth = dateOfBirthField.getValue();
+                }
 
-        ComboBox<GenderBadge> genderField = new ComboBox<>(genderComboBoxItems);
-        Label genderLabel = new Label("Gender");
-        genderLabel.setMaxWidth(280);
-        genderLabel.setLabelFor(genderField);
-        genderField.setPrefWidth(280);
-        genderField.getStyleClass().add(Tweaks.ALT_ICON);
-        genderField.setButtonCell(new GenderBadgeCell());
-        genderField.setCellFactory(c -> new GenderBadgeCell());
-        genderField.setPlaceholder(new Label("Loading..."));
-        // gender.getSelectionModel().select(new GenderBadge("MALE"));
-        Text genderErrorMessage = new Text(" ");
-        genderErrorMessage.setWrappingWidth(280);
-        genderErrorMessage.getStyleClass().addAll(Styles.TEXT);
-        CustomTextField genderValidationHelper = new CustomTextField();
-        genderValidationHelper.setVisible(false);
-        genderField.setOnAction(e -> genderValidationHelper.setText(genderField.getSelectionModel().getSelectedItem().text()));
-        validator.createCheck()
-                .dependsOn("gender", genderValidationHelper.textProperty())
-                .withMethod(c -> validatorGender(c, touchedGender))
-                .decoratingWith(m -> signUpFormDecorator(m, null, new ComboBox<?>[]{genderField}, null))
-                .decorates(genderErrorMessage)
-                .immediate();
+                if (genderField.getSelectionModel().getSelectedItem() == null) {
+                    touchedGender.set(true);
+                    hasError = true;
+                } else {
+                    gender = Gender.valueOf(genderField.getSelectionModel().getSelectedItem().text());
+                }
 
-        PasswordTextField passwordField = new PasswordTextField();
-        Label passwordLabel = new Label("Password");
-        passwordLabel.setMaxWidth(280);
-        passwordLabel.setLabelFor(passwordField);
-        passwordField.setPromptText("Enter a new password");
-        passwordField.setLeft(new FontIcon(Material2OutlinedAL.LOCK));
-        passwordField.setPrefWidth(280);
-        Text passwordErrorMessage = new Text(" ");
-        passwordErrorMessage.setWrappingWidth(280);
-        passwordErrorMessage.getStyleClass().addAll(Styles.TEXT);
-        validator.createCheck()
-                .dependsOn("password", passwordField.passwordProperty())
-                .withMethod(c -> validatorPassword(c, touchedPassword))
-                .decoratingWith(m -> signUpFormDecorator(m, null, null, new PasswordTextField[]{passwordField}))
-                .decorates(passwordErrorMessage)
-                .immediate();
+                if (username.isBlank()) {
+                    touchedUsername.set(true);
+                    hasError = true;
+                }
 
-        PasswordTextField confirmPasswordField = new PasswordTextField();
-        Label confirmPasswordLabel = new Label("Confirm Password");
-        confirmPasswordLabel.setMaxWidth(280);
-        confirmPasswordLabel.setLabelFor(confirmPasswordField);
-        confirmPasswordField.setPromptText("Re-type your password");
-        confirmPasswordField.setLeft(new FontIcon(Material2OutlinedAL.LOCK));
-        confirmPasswordField.setPrefWidth(280);
-        Text confirmPasswordErrorMessage = new Text(" ");
-        confirmPasswordErrorMessage.setWrappingWidth(280);
-        confirmPasswordErrorMessage.getStyleClass().addAll(Styles.TEXT);
-        validator.createCheck()
-                .dependsOn("confirmPassword", confirmPasswordField.passwordProperty())
-                .dependsOn("password", passwordField.passwordProperty())
-                .withMethod(c -> validatorConfirmPassword(c, touchedConfirmedPassword))
-                .decoratingWith(m -> signUpFormDecorator(m, null, null, new PasswordTextField[]{confirmPasswordField}))
-                .decorates(confirmPasswordErrorMessage)
-                .immediate();
+                if (password.isBlank()) {
+                    touchedPassword.set(true);
+                    touchedConfirmedPassword.set(true);
+                    hasError = true;
+                }
 
-        FontIcon passwordToggleIcon = getPasswordToggleIcon(passwordField, confirmPasswordField);
+                if (email.isBlank()) {
+                    touchedEmail.set(true);
+                    hasError = true;
+                }
 
-        passwordField.setRight(passwordToggleIcon);
+                if (phoneNumberCountryCodeInputField.getSelectionModel().getSelectedItem() == null || phoneNumberSubscriberNumberField.getText().isBlank()) {
+                    touchedPhoneNumber.set(true);
+                    hasError = true;
+                } else {
+                    phoneNumberCountryCode = phoneNumberCountryCodeInputField.getSelectionModel().getSelectedItem().text();
+                    phoneNumberSubscriberNumber = phoneNumberSubscriberNumberField.getText();
+                }
 
-        Button haveAccountBtn = new Button("Already have an account?");
-        haveAccountBtn.getStyleClass().addAll(Styles.FLAT);
-        haveAccountBtn.setMnemonicParsing(true);
-        haveAccountBtn.setOnAction(e -> QuestLog.viewSignInScene());
+                validator.validate();
 
-        Button signUpBtn = new Button("Sign Up", new FontIcon(Material2OutlinedAL.LOG_IN));
-        signUpBtn.getStyleClass().addAll(Styles.SUCCESS);
-        signUpBtn.setMnemonicParsing(true);
-
-        signUpActionBtnGroup.setSpacing(10);
-        signUpActionBtnGroup.setAlignment(Pos.CENTER_RIGHT);
-        signUpActionBtnGroup.getChildren().addAll(haveAccountBtn, signUpBtn);
-
-        signUpForm.addRow(0, signUpFormHeader);
-        signUpForm.addRow(1, new VBox(5, nameLabel, nameField, nameErrorMessage));
-        signUpForm.addRow(2, new VBox(5, usernameLabel, usernameField, usernameErrorMessage));
-        signUpForm.addRow(3, new VBox(5, emailLabel, emailField, emailErrorMessage));
-        signUpForm.addRow(4, new VBox(5, phoneNumberLabel, phoneNumberField, phoneNumberErrorMessage));
-        signUpForm.addRow(5, new VBox(5, dateOfBirthLabel, dateOfBirthField, dateOfBirthErrorMessage));
-        signUpForm.addRow(6, new VBox(5, genderLabel, genderField, genderErrorMessage));
-        signUpForm.addRow(7, new VBox(5, passwordLabel, passwordField, passwordErrorMessage));
-        signUpForm.addRow(8, new VBox(5, confirmPasswordLabel, confirmPasswordField, confirmPasswordErrorMessage));
-        GridPane.setConstraints(signUpActionBtnGroup, 0, 9, 1, 1, HPos.RIGHT, VPos.CENTER);
-
-        signUpForm.getChildren().add(9, signUpActionBtnGroup);
-
-        signUpFormScrollWrapper.setContent(signUpForm);
-        signUpFormScrollWrapper.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        signUpFormScrollWrapper.setFitToHeight(true);
-        signUpFormScrollWrapper.setFitToWidth(true);
-
-        signUpBtn.setOnAction(e -> {
-            boolean hasError = false;
-
-            String name = nameField.getText();
-            LocalDate dateOfBirth = null;
-            Gender gender = null;
-            String username = usernameField.getText();
-            String password = passwordField.getPassword();
-            String email = emailField.getText();
-            String phoneNumberCountryCode = null;
-            String phoneNumberSubscriberNumber = null;
-
-            if (name.isBlank()) {
-                touchedName.set(true);
-                hasError = true;
-            }
-
-            if (dateOfBirthField.getValue() == null) {
-                touchedDateOfBirth.set(true);
-                hasError = true;
-            } else {
-                dateOfBirth = dateOfBirthField.getValue();
-            }
-
-            if (genderField.getSelectionModel().getSelectedItem() == null) {
-                touchedGender.set(true);
-                hasError = true;
-            } else {
-                gender = Gender.valueOf(genderField.getSelectionModel().getSelectedItem().text());
-            }
-
-            if (username.isBlank()) {
-                touchedUsername.set(true);
-                hasError = true;
-            }
-
-            if (password.isBlank()) {
-                touchedPassword.set(true);
-                touchedConfirmedPassword.set(true);
-                hasError = true;
-            }
-
-            if (email.isBlank()) {
-                touchedEmail.set(true);
-                hasError = true;
-            }
-
-            if (phoneNumberCountryCodeInputField.getSelectionModel().getSelectedItem() == null || phoneNumberSubscriberNumberField.getText().isBlank()) {
-                touchedPhoneNumber.set(true);
-                hasError = true;
-            } else {
-                phoneNumberCountryCode = phoneNumberCountryCodeInputField.getSelectionModel().getSelectedItem().text();
-                phoneNumberSubscriberNumber = phoneNumberSubscriberNumberField.getText();
-            }
-
-            validator.validate();
-
-            if (!hasError && !validator.containsErrors()) {
-                try {
+                if (!hasError && !validator.containsErrors()) {
                     signUp(name, dateOfBirth, gender, username, password, email, phoneNumberCountryCode, phoneNumberSubscriberNumber);
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
                 }
-            }
-        });
+            });
 
-        // Add elements to the root
-        sceneRoot.setTop(topBar);
-        sceneRoot.setCenter(signUpFormScrollWrapper);
+            // Add elements to the root
+            sceneRoot.setTop(topBar);
+            sceneRoot.setCenter(signUpFormScrollWrapper);
+        }
 
         root.getChildren().addAll(sceneRoot);
     }
@@ -461,9 +462,17 @@ public class SignUpScene {
         return root;
     }
 
-    private void signUp(String name, LocalDate dateOfBirth, Gender gender, String username, String password, String email, String phoneNumberCountryCode, String phoneNumberSubscriberNumber) throws IOException {
+    private void signUp(String name, LocalDate dateOfBirth, Gender gender, String username, String password, String email, String phoneNumberCountryCode, String phoneNumberSubscriberNumber) {
         UserPhoneNumber newUserPhoneNumber = new UserPhoneNumber(phoneNumberCountryCode, phoneNumberSubscriberNumber, PhoneNumberUtil.PhoneNumberType.MOBILE);
-        User newUser = new User(name, dateOfBirth, gender, username, password, email, newUserPhoneNumber);
-        usersService.addData(newUser);
+        UserPassword newUserPassword = new UserPassword();
+        newUserPassword.setPassword(password);
+        newUserPassword.hashPassword();
+        User newUser = new User(name, dateOfBirth, gender, username, newUserPassword, email, newUserPhoneNumber);
+        try {
+            usersService.addData(newUser);
+            QuestLog.viewSignInScene();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

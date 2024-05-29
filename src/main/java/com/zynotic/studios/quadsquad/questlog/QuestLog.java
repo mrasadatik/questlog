@@ -7,6 +7,7 @@ import com.zynotic.studios.quadsquad.questlog.scenes.DashboardScene;
 import com.zynotic.studios.quadsquad.questlog.scenes.LandingScene;
 import com.zynotic.studios.quadsquad.questlog.scenes.SignInScene;
 import com.zynotic.studios.quadsquad.questlog.scenes.SignUpScene;
+import com.zynotic.studios.quadsquad.questlog.utils.SessionManager;
 import javafx.application.Application;
 import javafx.geometry.*;
 import javafx.scene.Scene;
@@ -23,6 +24,7 @@ import java.util.Objects;
  */
 public class QuestLog extends Application {
     private static Stage primaryStage;
+    private static final SessionManager session = new SessionManager();
 
     /**
      * Initializes the application.
@@ -72,28 +74,28 @@ public class QuestLog extends Application {
     }
 
     public static void viewLandingScene() {
-        LandingScene landingScene = new LandingScene();
+        LandingScene landingScene = new LandingScene(session);
         Scene scene = new Scene(landingScene.getRoot());
         scene.getStylesheets().add(Objects.requireNonNull(LandingScene.class.getResource("LandingScene/style.css")).toExternalForm());
         primaryStage.setScene(scene);
     }
 
     public static void viewSignInScene() {
-        SignInScene signInScene = new SignInScene(primaryStage);
+        SignInScene signInScene = new SignInScene(primaryStage, session);
         Scene scene = new Scene(signInScene.getRoot());
         scene.getStylesheets().add(Objects.requireNonNull(SignInScene.class.getResource("SignInScene/style.css")).toExternalForm());
         primaryStage.setScene(scene);
     }
 
     public static void viewSignUpScene() throws IOException {
-        SignUpScene signUpScene = new SignUpScene(primaryStage);
+        SignUpScene signUpScene = new SignUpScene(primaryStage, session);
         Scene scene = new Scene(signUpScene.getRoot());
         scene.getStylesheets().add(Objects.requireNonNull(SignUpScene.class.getResource("SignUpScene/style.css")).toExternalForm());
         primaryStage.setScene(scene);
     }
 
     public static void viewDashboardScene() throws IOException, URISyntaxException {
-        DashboardScene dashboardScene = new DashboardScene(primaryStage);
+        DashboardScene dashboardScene = new DashboardScene(primaryStage, session);
         Scene scene = new Scene(dashboardScene.getRoot());
         scene.getStylesheets().add(Objects.requireNonNull(DashboardScene.class.getResource("DashboardScene/style.css")).toExternalForm());
         primaryStage.setScene(scene);

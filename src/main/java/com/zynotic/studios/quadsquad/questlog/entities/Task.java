@@ -49,11 +49,8 @@ public class Task implements Serializable, DataIdentifier {
     @JsonProperty("taskId") // Maps 'taskId' field to JSON key
     private int taskId; // Unique ID of the task
 
-    @NotNull(message = "Project ID for Task cannot be null")
-    @PositiveOrZero(message = "Project ID for Task must greater that or equal to 0")
-    @Min(value = 0, message = "Project ID for Task must greater that or equal to 0")
     @JsonProperty("boundToProject") // Maps 'boundToProject' field to JSON key
-    private int boundToProject; // ID of the project to which the task is bound
+    private Integer boundToProject; // ID of the project to which the task is bound
 
     @NotNull(message = "Task title cannot be null")
     @NotBlank(message = "Task title cannot be blank")
@@ -107,7 +104,6 @@ public class Task implements Serializable, DataIdentifier {
             @NotNull(message = "User cannot be null")
             User user,
 
-            @NotNull(message = "Project cannot be null")
             Project project,
 
             @NotNull(message = "Task title cannot be null")
@@ -120,7 +116,7 @@ public class Task implements Serializable, DataIdentifier {
             @FutureOrPresent(message = "Task due date should be in future")
             ZonedDateTime dueDate
     ) {
-        this.boundToProject = project.getProjectId();
+        this.boundToProject = project == null ? null : project.getProjectId();
         this.title = title;
         this.description = description;
         this.addDate = ZonedDateTime.now(ZoneId.of(APP_DEFAULT_TIMEZONE)); // Set creation date and time to current date and time
@@ -194,20 +190,19 @@ public class Task implements Serializable, DataIdentifier {
      *
      * @return The ID of the project.
      */
-    public int getBoundToProject() {
+    public Integer getBoundToProject() {
         return boundToProject;
     }
 
     /**
      * Sets the ID of the project to which the task is bound.
      *
-     * @param project The project whose ID will be set.
+     * @param boundProjectOd The project whose ID will be set.
      */
     public void setBoundToProject(
-            @NotNull(message = "Project cannot be null")
-            Project project
+            Integer boundProjectOd
     ) {
-        this.boundToProject = project.getProjectId();
+        this.boundToProject = boundProjectOd;
     }
 
     /**
@@ -336,13 +331,13 @@ public class Task implements Serializable, DataIdentifier {
     /**
      * Sets the username of the user to whom the task is bound.
      *
-     * @param user The user object representing the user to whom the task is bound.
+     * @param username The user object representing the user to whom the task is bound.
      */
     public void setBoundToUser(
             @NotNull(message = "User cannot be null")
-            User user
+            String username
     ) {
-        this.boundToUser = user.getUsername();
+        this.boundToUser = username;
     }
 
     /**

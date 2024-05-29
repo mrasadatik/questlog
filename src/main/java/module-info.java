@@ -23,12 +23,13 @@ module com.zynotic.studios.quadsquad.questlog {
     requires batik.css;
     requires jdk.xml.dom;
     requires batik.svg.dom;
-    requires de.mkammerer.argon2.nolibs;
+    requires de.mkammerer.argon2;
     requires java.sql;
     requires org.hibernate.validator;
     requires jakarta.validation;
     requires com.sun.jna;
     requires org.glassfish.expressly;
+    requires de.mkammerer.argon2.nolibs;
 
     opens com.zynotic.studios.quadsquad.questlog to javafx.fxml;
     opens com.zynotic.studios.quadsquad.questlog.entities to com.fasterxml.jackson.databind, org.hibernate.validator;

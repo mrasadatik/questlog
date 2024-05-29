@@ -15,6 +15,7 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
 
@@ -41,7 +42,7 @@ public class User implements Serializable, DataIdentifier {
     @NotNull(message = "Name cannot be null")
     @NotBlank(message = "Name cannot be blank")
     @Length(min = 5, max = 100, message = "Name should be at least 5 characters long and less than 100")
-    @Pattern(regexp = "^(?!.*(?:\\s\\s|-{2,}|'{2,})).{2,}(?:\\s(?!.*(?:\\s\\s|-{2,}|'{2,})).{2,})+$", message = "Please enter a full name with a space separating first and last name. Avoid consecutive spaces, hyphens, or apostrophes")
+    @Pattern(regexp = "^(?=.{5,100}$)(?!.*(?:\\s\\s|-{2,}|'{2,})).{2,}(?:\\s(?!.*(?:\\s\\s|-{2,}|'{2,})).{2,})+$", message = "Please enter a full name with a space separating first and last name. Avoid consecutive spaces, hyphens, or apostrophes")
     @JsonProperty("name") // Maps 'name' field to JSON key
     private String name; // Name of the user
 
@@ -59,14 +60,13 @@ public class User implements Serializable, DataIdentifier {
     @NotNull(message = "Username cannot be null")
     @NotBlank(message = "Username cannot be blank")
     @Length(min = 4, max = 30, message = "Username should be at least 4 characters long and less than 30")
-    @Pattern(regexp = "^[a-z0-9]+$", message = "Username can only contain letters (a-z) and digits (0-9)")
+    @Pattern(regexp = "^(?=.{4,30})[a-z0-9]+$", message = "Username can only contain letters (a-z) and digits (0-9)")
     @JsonProperty("username") // Maps 'username' field to JSON key
     private String username; // Username of the user
 
     @NotNull(message = "Password cannot be null")
-    @NotBlank(message = "Password cannot be blank")
     @JsonProperty("password") // Maps 'password' field to JSON key
-    private String password; // Password of the user
+    private UserPassword password; // Password of the user
 
     @NotNull(message = "Email cannot be null")
     @NotBlank(message = "Email cannot be blank")
@@ -104,18 +104,18 @@ public class User implements Serializable, DataIdentifier {
     /**
      * Constructs a new User instance with the specified attributes.
      *
-     * @param name        The name of the user.
-     * @param dateOfBirth The date of birth of the user.
-     * @param username    The username of the user.
-     * @param password    The password of the user.
-     * @param email       The email of the user.
-     * @param phoneNumber The phone number of the user.
+     * @param name          The name of the user.
+     * @param dateOfBirth   The date of birth of the user.
+     * @param username      The username of the user.
+     * @param userPassword  The password of the user.
+     * @param email         The email of the user.
+     * @param phoneNumber   The phone number of the user.
      */
     public User(
             @NotNull(message = "Name cannot be null")
             @NotBlank(message = "Name cannot be blank")
             @Length(min = 5, max = 100, message = "Name should be at least 5 characters long and less than 100")
-            @Pattern(regexp = "^(?!.*(?:\\s\\s|-{2,}|'{2,})).{2,}(?:\\s(?!.*(?:\\s\\s|-{2,}|'{2,})).{2,})+$", message = "Please enter a full name with a space separating first and last name. Avoid consecutive spaces, hyphens, or apostrophes")
+            @Pattern(regexp = "^(?=.{5,100}$)(?!.*(?:\\s\\s|-{2,}|'{2,})).{2,}(?:\\s(?!.*(?:\\s\\s|-{2,}|'{2,})).{2,})+$", message = "Please enter a full name with a space separating first and last name. Avoid consecutive spaces, hyphens, or apostrophes")
             String name,
 
             @NotNull(message = "Date of Birth cannot be null")
@@ -130,14 +130,11 @@ public class User implements Serializable, DataIdentifier {
             @NotNull(message = "Username cannot be null")
             @NotBlank(message = "Username cannot be blank")
             @Length(min = 4, max = 30, message = "Username should be at least 4 characters long and less than 30")
-            @Pattern(regexp = "^[a-z0-9]+$", message = "Username can only contain letters (a-z) and digits (0-9)")
+            @Pattern(regexp = "^(?=.{4,30})[a-z0-9]+$", message = "Username can only contain letters (a-z) and digits (0-9)")
             String username,
 
             @NotNull(message = "Password cannot be null")
-            @NotBlank(message = "Password cannot be blank")
-            @Length(min = 8, message = "Password should be at least 8 characters long")
-            @Pattern(regexp = "^(?=.*\\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[^\\w\\d\\s:])([^\\s]){8,}$", message = "Password must be at least 8 characters with a mix of uppercase, lowercase letters, digits, and special characters (no spaces or underscore)")
-            String password,
+            UserPassword userPassword,
 
             @NotNull(message = "Email cannot be null")
             @NotBlank(message = "Email cannot be blank")
@@ -152,7 +149,7 @@ public class User implements Serializable, DataIdentifier {
         this.dateOfBirth = dateOfBirth;
         this.gender = gender;
         this.username = username;
-        this.password = password;
+        this.password = userPassword;
         this.email = email;
         this.phoneNumber = phoneNumber;
         this.timezone = APP_DEFAULT_TIMEZONE;
@@ -237,7 +234,7 @@ public class User implements Serializable, DataIdentifier {
             @NotNull(message = "Name cannot be null")
             @NotBlank(message = "Name cannot be blank")
             @Length(min = 5, max = 100, message = "Name should be at least 5 characters long and less than 100")
-            @Pattern(regexp = "^(?!.*(?:\\s\\s|-{2,}|'{2,})).{2,}(?:\\s(?!.*(?:\\s\\s|-{2,}|'{2,})).{2,})+$", message = "Please enter a full name with a space separating first and last name. Avoid consecutive spaces, hyphens, or apostrophes")
+            @Pattern(regexp = "^(?=.{5,100}$)(?!.*(?:\\s\\s|-{2,}|'{2,})).{2,}(?:\\s(?!.*(?:\\s\\s|-{2,}|'{2,})).{2,})+$", message = "Please enter a full name with a space separating first and last name. Avoid consecutive spaces, hyphens, or apostrophes")
             String name
     ) {
         this.name = name;
@@ -306,7 +303,7 @@ public class User implements Serializable, DataIdentifier {
             @NotNull(message = "Username cannot be null")
             @NotBlank(message = "Username cannot be blank")
             @Length(min = 4, max = 30, message = "Username should be at least 4 characters long and less than 30")
-            @Pattern(regexp = "^[a-z0-9]+$", message = "Username can only contain letters (a-z) and digits (0-9)")
+            @Pattern(regexp = "^(?=.{4,30})[a-z0-9]+$", message = "Username can only contain letters (a-z) and digits (0-9)")
             String username
     ) {
         this.username = username;
@@ -317,23 +314,21 @@ public class User implements Serializable, DataIdentifier {
      *
      * @return The password of the user.
      */
-    public String getPassword() {
+    public UserPassword getPassword() {
         return password;
     }
 
     /**
      * Sets the password of the user.
      *
-     * @param password The password of the user.
+     * @param userPassword The password of the user.
      */
     public void setPassword(
             @NotNull(message = "Password cannot be null")
-            @NotBlank(message = "Password cannot be blank")
-            @Length(min = 8, message = "Password should be at least 8 characters long")
-            @Pattern(regexp = "^(?=.*\\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[^\\w\\d\\s:])([^\\s]){8,}$", message = "Password must be at least 8 characters with a mix of uppercase, lowercase letters, digits, and special characters (no spaces or underscore)")
-            String password
+            UserPassword userPassword
     ) {
-        this.password = password;
+
+        this.password = userPassword;
     }
 
     /**
@@ -446,6 +441,27 @@ public class User implements Serializable, DataIdentifier {
             int status
     ) {
         this.status = status;
+    }
+
+    public boolean verifyPassword(String passwordToCheck) {
+        return password.verifyPassword(passwordToCheck, Base64.getDecoder().decode(password.getSalt()), password.getHashLength(), Base64.getDecoder().decode(password.getRawHashedPassword()));
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "userId=" + userId +
+                ", name='" + name + '\'' +
+                ", dateOfBirth=" + dateOfBirth +
+                ", gender=" + gender +
+                ", username='" + username + '\'' +
+                ", password=" + password +
+                ", email='" + email + '\'' +
+                ", phoneNumber=" + phoneNumber +
+                ", timezone='" + timezone + '\'' +
+                ", addedAt=" + addedAt +
+                ", status=" + status +
+                '}';
     }
 
     /**
